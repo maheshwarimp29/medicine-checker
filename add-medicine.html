@@ -29,10 +29,6 @@
             color: #10244b;
         }
 
-        /* =========================
-           SIDEBAR
-        ========================= */
-
         .sidebar {
             position: fixed;
             left: 0;
@@ -107,10 +103,6 @@
             font-size: 18px;
         }
 
-        /* =========================
-           MAIN
-        ========================= */
-
         .main {
             margin-left: 285px;
             padding: 34px;
@@ -148,10 +140,6 @@
             color: #2864e8;
             font-weight: bold;
         }
-
-        /* =========================
-           FORM CARD
-        ========================= */
 
         .form-card {
             max-width: 950px;
@@ -225,10 +213,6 @@
             margin-top: 6px;
         }
 
-        /* =========================
-           BUTTONS
-        ========================= */
-
         .buttons {
             margin-top: 25px;
             display: flex;
@@ -270,10 +254,6 @@
             background: #f5f8fc;
         }
 
-        /* =========================
-           MESSAGE
-        ========================= */
-
         .message {
             display: none;
             margin-top: 20px;
@@ -296,10 +276,6 @@
             color: #b42318;
             border: 1px solid #f1b8b8;
         }
-
-        /* =========================
-           PREVIEW
-        ========================= */
 
         .preview {
             max-width: 950px;
@@ -329,10 +305,6 @@
             color: #71809a;
         }
 
-        /* =========================
-           MOBILE BUTTON
-        ========================= */
-
         .mobile-button {
             display: none;
             position: fixed;
@@ -348,10 +320,6 @@
             z-index: 2000;
             cursor: pointer;
         }
-
-        /* =========================
-           MOBILE
-        ========================= */
 
         @media(max-width:750px) {
 
@@ -412,10 +380,6 @@
 </head>
 
 <body>
-
-    <!-- =========================
-         SIDEBAR
-    ========================= -->
 
     <aside class="sidebar" id="sidebar">
 
@@ -482,9 +446,6 @@
 
     </aside>
 
-
-    <!-- MOBILE MENU BUTTON -->
-
     <button
         class="mobile-button"
         onclick="toggleMenu()"
@@ -493,21 +454,18 @@
         ☰
     </button>
 
-
-    <!-- =========================
-         MAIN
-    ========================= -->
-
     <main class="main">
 
         <section class="header">
 
             <div>
+
                 <h1>Add Medicine</h1>
 
                 <p>
                     Add a new medicine to your inventory.
                 </p>
+
             </div>
 
             <div class="user" id="userAvatar">
@@ -515,11 +473,6 @@
             </div>
 
         </section>
-
-
-        <!-- =========================
-             FORM
-        ========================= -->
 
         <section class="form-card">
 
@@ -533,12 +486,9 @@
 
             </div>
 
-
             <form id="medicineForm">
 
                 <div class="form-grid">
-
-                    <!-- MEDICINE NAME -->
 
                     <div class="form-group">
 
@@ -559,9 +509,6 @@
 
                     </div>
 
-
-                    <!-- COMPANY -->
-
                     <div class="form-group">
 
                         <label for="company">
@@ -580,9 +527,6 @@
 
                     </div>
 
-
-                    <!-- PRICE -->
-
                     <div class="form-group">
 
                         <label for="price">
@@ -599,9 +543,6 @@
                         >
 
                     </div>
-
-
-                    <!-- STOCK -->
 
                     <div class="form-group">
 
@@ -624,9 +565,6 @@
 
                     </div>
 
-
-                    <!-- LOW STOCK -->
-
                     <div class="form-group">
 
                         <label for="lowStock">
@@ -647,9 +585,6 @@
                         </span>
 
                     </div>
-
-
-                    <!-- CATEGORY -->
 
                     <div class="form-group">
 
@@ -695,9 +630,6 @@
 
                     </div>
 
-
-                    <!-- NOTES -->
-
                     <div class="form-group full">
 
                         <label for="notes">
@@ -712,9 +644,6 @@
                     </div>
 
                 </div>
-
-
-                <!-- BUTTONS -->
 
                 <div class="buttons">
 
@@ -735,9 +664,6 @@
 
                 </div>
 
-
-                <!-- MESSAGE -->
-
                 <div
                     id="message"
                     class="message"
@@ -746,11 +672,6 @@
             </form>
 
         </section>
-
-
-        <!-- =========================
-             PREVIEW
-        ========================= -->
 
         <section class="preview">
 
@@ -770,7 +691,6 @@
 
             </div>
 
-
             <div class="preview-row">
 
                 <span class="preview-label">
@@ -782,7 +702,6 @@
                 </strong>
 
             </div>
-
 
             <div class="preview-row">
 
@@ -796,7 +715,6 @@
 
             </div>
 
-
             <div class="preview-row">
 
                 <span class="preview-label">
@@ -808,7 +726,6 @@
                 </strong>
 
             </div>
-
 
             <div class="preview-row">
 
@@ -825,11 +742,6 @@
         </section>
 
     </main>
-
-
-    <!-- =========================
-         JAVASCRIPT
-    ========================= -->
 
     <script>
 
@@ -1113,8 +1025,6 @@
                     notes.value.trim();
 
 
-                /* VALIDATION */
-
                 if (!medicineNameValue) {
 
                     showMessage(
@@ -1176,8 +1086,6 @@
                 }
 
 
-                /* BUTTON LOADING */
-
                 saveButton.disabled = true;
 
                 saveButton.textContent =
@@ -1186,11 +1094,11 @@
 
                 try {
 
-                    /* SEND DATA TO NODE.JS */
+                    /* RENDER BACKEND */
 
                     const response =
                         await fetch(
-                            "/api/medicines",
+                            "https://medicine-checker.onrender.com/api/medicines",
                             {
                                 method: "POST",
 
@@ -1231,8 +1139,6 @@
                         await response.json();
 
 
-                    /* SERVER ERROR */
-
                     if (
                         !response.ok ||
                         !data.success
@@ -1246,23 +1152,15 @@
                     }
 
 
-                    /* SUCCESS */
-
                     showMessage(
                         "Medicine saved successfully! 💊",
                         "success"
                     );
 
 
-                    /* CLEAR FORM */
-
                     form.reset();
 
-
-                    /* KEEP LOW STOCK DEFAULT */
-
                     lowStock.value = 10;
-
 
                     updatePreview();
 
