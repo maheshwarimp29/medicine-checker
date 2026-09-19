@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>About - Medicine Checker</title>
+
+  <!-- LOGIN PROTECTION -->
+  <script>
+    const loggedInUser =
+      localStorage.getItem("medicineCheckerUser");
+
+    if (!loggedInUser) {
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #edf4fc;
+      min-height: 100vh;
+      color: #1d2b4f;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: linear-gradient(180deg, #2864e8, #2149b9);
+      color: white;
+      padding: 22px 15px;
+      z-index: 1000;
+      transition: 0.3s;
+      overflow-y: auto;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 5px 10px 28px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      background: white;
+      color: #2864e8;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .logo-text {
+      font-size: 19px;
+      font-weight: bold;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      padding: 13px 14px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .menu a:hover,
+    .menu a.active {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .menu-icon {
+      width: 22px;
+      text-align: center;
+      font-size: 17px;
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: 250px;
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      gap: 15px;
+    }
+
+    .topbar-left h1 {
+      font-size: 27px;
+      color: #172b59;
+    }
+
+    .topbar-left p {
+      color: #71809d;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-info {
+      color: #60708d;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .user-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #2864e8;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 17px;
+    }
+
+    .menu-btn {
+      display: none;
+      border: none;
+      background: #2864e8;
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    /* HERO */
+    .about-hero {
+      background: linear-gradient(135deg, #2864e8, #2149b9);
+      color: white;
+      border-radius: 18px;
+      padding: 35px;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 25px rgba(38, 83, 150, 0.15);
+    }
+
+    .about-hero-logo {
+      width: 58px;
+      height: 58px;
+      background: white;
+      color: #2864e8;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: bold;
+      margin-bottom: 18px;
+    }
+
+    .about-hero h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .about-hero p {
+      max-width: 750px;
+      line-height: 1.7;
+      font-size: 15px;
+      color: #eaf1ff;
+    }
+
+    /* CONTENT */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 5px 20px rgba(38, 83, 150, 0.08);
+    }
+
+    .card h3 {
+      color: #172b59;
+      font-size: 19px;
+      margin-bottom: 15px;
+    }
+
+    .card p {
+      color: #667793;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #536582;
+      font-size: 14px;
+    }
+
+    .check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e7f0ff;
+      color: #2864e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* TECHNOLOGY */
+    .technology-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 5px 20px rgba(38, 83, 150, 0.08);
+      margin-bottom: 22px;
+    }
+
+    .technology-card h3 {
+      color: #172b59;
+      font-size: 19px;
+      margin-bottom: 18px;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    .tech-item {
+      background: #f4f8ff;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .tech-icon {
+      font-size: 25px;
+      margin-bottom: 9px;
+    }
+
+    .tech-name {
+      color: #2864e8;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .tech-description {
+      color: #7a89a2;
+      font-size: 11px;
+      margin-top: 5px;
+    }
+
+    /* FOOTER */
+    .footer-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(38, 83, 150, 0.08);
+    }
+
+    .footer-card p {
+      color: #7a89a2;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .version {
+      display: inline-block;
+      margin-top: 8px;
+      background: #eaf1ff;
+      color: #2864e8;
+      padding: 6px 11px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    /* OVERLAY */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      z-index: 900;
+    }
+
+    /* MOBILE */
+    @media (max-width: 1000px) {
+      .tech-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 850px) {
+      .sidebar {
+        left: -260px;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .overlay.show {
+        display: block;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 18px;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        gap: 15px;
+      }
+
+      .topbar-left h1 {
+        font-size: 23px;
+      }
+
+      .user-info {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .main {
+        padding: 14px;
+      }
+
+      .about-hero {
+        padding: 25px;
+      }
+
+      .about-hero h2 {
+        font-size: 23px;
+      }
+
+      .card,
+      .technology-card,
+      .footer-card {
+        padding: 18px;
+      }
+
+      .tech-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .user-avatar {
+        width: 38px;
+        height: 38px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="logo-area">
+      <div class="logo">M</div>
+      <div class="logo-text">Medicine Checker</div>
+    </div>
+
+    <nav class="menu">
+
+      <a href="dashboard.html">
+        <span class="menu-icon">▦</span>
+        Dashboard
+      </a>
+
+      <a href="add-medicine.html">
+        <span class="menu-icon">＋</span>
+        Add Medicine
+      </a>
+
+      <a href="medicine-list.html">
+        <span class="menu-icon">☷</span>
+        Medicine List
+      </a>
+
+      <a href="sell-medicine.html">
+        <span class="menu-icon">₹</span>
+        Sell Medicine
+      </a>
+
+      <a href="sales-history.html">
+        <span class="menu-icon">▤</span>
+        Sales History
+      </a>
+
+      <a href="search-medicine.html">
+        <span class="menu-icon">⌕</span>
+        Search Medicine
+      </a>
+
+      <a href="reports.html">
+        <span class="menu-icon">▥</span>
+        Reports
+      </a>
+
+      <a href="about.html" class="active">
+        <span class="menu-icon">ⓘ</span>
+        About
+      </a>
+
+      <a href="#" onclick="logout(); return false;">
+        <span class="menu-icon">⇥</span>
+        Logout
+      </a>
+
+    </nav>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="topbar">
+
+      <div class="topbar-left">
+        <h1>About</h1>
+        <p>Information about Medicine Checker.</p>
+      </div>
+
+      <div class="topbar-right">
+
+        <div class="user-info" id="userName">
+          User
+        </div>
+
+        <div class="user-avatar" id="userAvatar">
+          U
+        </div>
+
+        <button class="menu-btn" id="menuBtn">
+          ☰
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- HERO -->
+    <section class="about-hero">
+
+      <div class="about-hero-logo">M</div>
+
+      <h2>Medicine Checker</h2>
+
+      <p>
+        Medicine Checker is a medicine inventory and sales
+        management system designed to make medicine stock
+        management simple, organized and efficient.
+      </p>
+
+    </section>
+
+
+    <!-- CONTENT -->
+    <section class="content-grid">
+
+      <div class="card">
+
+        <h3>About the System</h3>
+
+        <p>
+          This system helps manage medicines, monitor stock
+          availability, record medicine sales and review
+          sales information from one convenient dashboard.
+          Medicine stock is automatically updated when a sale
+          is completed.
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>Key Features</h3>
+
+        <ul class="feature-list">
+
+          <li>
+            <span class="check">✓</span>
+            Medicine inventory management
+          </li>
+
+          <li>
+            <span class="check">✓</span>
+            Stock availability monitoring
+          </li>
+
+          <li>
+            <span class="check">✓</span>
+            Medicine sales recording
+          </li>
+
+          <li>
+            <span class="check">✓</span>
+            Automatic stock reduction
+          </li>
+
+          <li>
+            <span class="check">✓</span>
+            Sales history and reports
+          </li>
+
+          <li>
+            <span class="check">✓</span>
+            Medicine search
+          </li>
+
+          <li>
+            <span class="check">✓</span>
+            Mobile responsive interface
+          </li>
+
+        </ul>
+
+      </div>
+
+    </section>
+
+
+    <!-- TECHNOLOGY -->
+    <section class="technology-card">
+
+      <h3>Technology</h3>
+
+      <div class="tech-grid">
+
+        <div class="tech-item">
+          <div class="tech-icon">🌐</div>
+          <div class="tech-name">HTML</div>
+          <div class="tech-description">Page structure</div>
+        </div>
+
+        <div class="tech-item">
+          <div class="tech-icon">🎨</div>
+          <div class="tech-name">CSS</div>
+          <div class="tech-description">Interface design</div>
+        </div>
+
+        <div class="tech-item">
+          <div class="tech-icon">⚡</div>
+          <div class="tech-name">JavaScript</div>
+          <div class="tech-description">Application logic</div>
+        </div>
+
+        <div class="tech-item">
+          <div class="tech-icon">🗄️</div>
+          <div class="tech-name">SQLite</div>
+          <div class="tech-description">Database storage</div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <section class="footer-card">
+
+      <p>
+        Medicine Checker — Medicine Availability
+        Management System
+      </p>
+
+      <p>
+        Built for simple and organized medicine inventory
+        and sales management.
+      </p>
+
+      <span class="version">
+        Version 1.0
+      </span>
+
+    </section>
+
+  </main>
+
+
+  <script>
+
+    /* =========================
+       USER / AUTH
+    ========================= */
+
+    let currentUser = null;
+
+    try {
+
+      currentUser =
+        JSON.parse(
+          localStorage.getItem(
+            "medicineCheckerUser"
+          )
+        );
+
+    } catch (error) {
+
+      currentUser = null;
+
+    }
+
+
+    if (
+      !currentUser ||
+      !currentUser.name
+    ) {
+
+      localStorage.removeItem(
+        "medicineCheckerUser"
+      );
+
+      window.location.href =
+        "index.html";
+
+    }
+
+
+    /* USER NAME */
+    document.getElementById(
+      "userName"
+    ).textContent =
+      currentUser.name;
+
+
+    /* USER AVATAR */
+    document.getElementById(
+      "userAvatar"
+    ).textContent =
+      currentUser.name
+        .trim()
+        .charAt(0)
+        .toUpperCase();
+
+
+    /* LOGOUT */
+    function logout() {
+
+      localStorage.removeItem(
+        "medicineCheckerUser"
+      );
+
+      window.location.href =
+        "index.html";
+
+    }
+
+
+    /* MOBILE SIDEBAR */
+
+    const sidebar =
+      document.getElementById(
+        "sidebar"
+      );
+
+    const overlay =
+      document.getElementById(
+        "overlay"
+      );
+
+    const menuBtn =
+      document.getElementById(
+        "menuBtn"
+      );
+
+
+    menuBtn.addEventListener(
+      "click",
+      () => {
+
+        sidebar.classList.add(
+          "open"
+        );
+
+        overlay.classList.add(
+          "show"
+        );
+
+      }
+    );
+
+
+    overlay.addEventListener(
+      "click",
+      () => {
+
+        sidebar.classList.remove(
+          "open"
+        );
+
+        overlay.classList.remove(
+          "show"
+        );
+
+      }
+    );
+
+
+    document.querySelectorAll(
+      ".menu a"
+    ).forEach(
+      link => {
+
+        link.addEventListener(
+          "click",
+          () => {
+
+            sidebar.classList.remove(
+              "open"
+            );
+
+            overlay.classList.remove(
+              "show"
+            );
+
+          }
+        );
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>

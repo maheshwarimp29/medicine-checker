@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Add Medicine - Medicine Checker</title>
+
+    <!-- LOGIN PROTECTION -->
+    <script>
+        const loggedInUser =
+            localStorage.getItem("medicineCheckerUser");
+
+        if (!loggedInUser) {
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #edf4fc;
+            color: #10244b;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 285px;
+            background: linear-gradient(180deg, #2864e8, #2149b9);
+            color: white;
+            padding: 28px 20px;
+            overflow-y: auto;
+        }
+
+        .brand {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,.2);
+        }
+
+        .brand-logo {
+            width: 65px;
+            height: 65px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: #2864e8;
+            border-radius: 18px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .brand h2 {
+            margin-top: 18px;
+            font-size: 23px;
+        }
+
+        .brand p {
+            margin-top: 6px;
+            opacity: .8;
+            font-size: 14px;
+        }
+
+        .menu {
+            margin-top: 27px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .menu a.active {
+            background: white;
+            color: #2864e8;
+        }
+
+        .menu-icon {
+            width: 25px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 285px;
+            padding: 34px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 25px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .header h1 {
+            color: #2864e8;
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .header p {
+            color: #71809a;
+        }
+
+        .user {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dceaff;
+            color: #2864e8;
+            font-weight: bold;
+        }
+
+        /* =========================
+           FORM CARD
+        ========================= */
+
+        .form-card {
+            max-width: 950px;
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .form-header {
+            margin-bottom: 25px;
+        }
+
+        .form-header h2 {
+            font-size: 24px;
+            margin-bottom: 7px;
+        }
+
+        .form-header p {
+            color: #71809a;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #dce5f1;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+            background: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #2864e8;
+            box-shadow: 0 0 0 4px rgba(40,100,232,.08);
+        }
+
+        .help {
+            font-size: 12px;
+            color: #71809a;
+            margin-top: 6px;
+        }
+
+        /* =========================
+           BUTTONS
+        ========================= */
+
+        .buttons {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .save-button {
+            border: none;
+            background: #2864e8;
+            color: white;
+            padding: 14px 25px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-button:hover {
+            background: #1e4fc1;
+        }
+
+        .save-button:disabled {
+            background: #91afea;
+            cursor: not-allowed;
+        }
+
+        .clear-button {
+            border: 1px solid #dce5f1;
+            background: white;
+            color: #526985;
+            padding: 14px 25px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .clear-button:hover {
+            background: #f5f8fc;
+        }
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .message.success {
+            display: block;
+            background: #e9f8ef;
+            color: #18743b;
+            border: 1px solid #bde8ca;
+        }
+
+        .message.error {
+            display: block;
+            background: #fff0f0;
+            color: #b42318;
+            border: 1px solid #f1b8b8;
+        }
+
+        /* =========================
+           PREVIEW
+        ========================= */
+
+        .preview {
+            max-width: 950px;
+            margin-top: 22px;
+            background: #f7faff;
+            border: 1px solid #dfe9f7;
+            border-radius: 18px;
+            padding: 22px;
+        }
+
+        .preview h3 {
+            margin-bottom: 15px;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e7edf6;
+        }
+
+        .preview-row:last-child {
+            border-bottom: none;
+        }
+
+        .preview-label {
+            color: #71809a;
+        }
+
+        /* =========================
+           MOBILE BUTTON
+        ========================= */
+
+        .mobile-button {
+            display: none;
+            position: fixed;
+            left: 15px;
+            top: 15px;
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 10px;
+            background: #2864e8;
+            color: white;
+            font-size: 22px;
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media(max-width:750px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: .3s;
+                z-index: 1000;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-button {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 18px;
+                padding-top: 75px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: span 1;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .save-button,
+            .clear-button {
+                width: 100%;
+            }
+
+            .preview-row {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                M
+            </div>
+
+            <h2>Medicine Checker</h2>
+
+            <p>Admin Panel</p>
+
+        </div>
+
+        <nav class="menu">
+
+            <a href="dashboard.html">
+                <span class="menu-icon">🏠</span>
+                Dashboard
+            </a>
+
+            <a href="add-medicine.html" class="active">
+                <span class="menu-icon">➕</span>
+                Add Medicine
+            </a>
+
+            <a href="medicine-list.html">
+                <span class="menu-icon">💊</span>
+                Medicine List
+            </a>
+
+            <a href="sell-medicine.html">
+                <span class="menu-icon">💰</span>
+                Sell Medicine
+            </a>
+
+            <a href="sales-history.html">
+                <span class="menu-icon">📋</span>
+                Sales History
+            </a>
+
+            <a href="search-medicine.html">
+                <span class="menu-icon">🔍</span>
+                Search Medicine
+            </a>
+
+            <a href="reports.html">
+                <span class="menu-icon">📊</span>
+                Reports
+            </a>
+
+            <a href="about.html">
+                <span class="menu-icon">ℹ️</span>
+                About
+            </a>
+
+            <a href="#" onclick="logout(); return false;">
+                <span class="menu-icon">🚪</span>
+                Logout
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- MOBILE MENU BUTTON -->
+
+    <button
+        class="mobile-button"
+        onclick="toggleMenu()"
+        aria-label="Open menu"
+    >
+        ☰
+    </button>
+
+
+    <!-- =========================
+         MAIN
+    ========================= -->
+
+    <main class="main">
+
+        <section class="header">
+
+            <div>
+                <h1>Add Medicine</h1>
+
+                <p>
+                    Add a new medicine to your inventory.
+                </p>
+            </div>
+
+            <div class="user" id="userAvatar">
+                U
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             FORM
+        ========================= -->
+
+        <section class="form-card">
+
+            <div class="form-header">
+
+                <h2>Medicine Information</h2>
+
+                <p>
+                    Enter the details of the medicine below.
+                </p>
+
+            </div>
+
+
+            <form id="medicineForm">
+
+                <div class="form-grid">
+
+                    <!-- MEDICINE NAME -->
+
+                    <div class="form-group">
+
+                        <label for="medicineName">
+                            Medicine Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="medicineName"
+                            placeholder="Example: Paracetamol 500mg"
+                            required
+                        >
+
+                        <span class="help">
+                            Enter the complete medicine name.
+                        </span>
+
+                    </div>
+
+
+                    <!-- COMPANY -->
+
+                    <div class="form-group">
+
+                        <label for="company">
+                            Company / Manufacturer
+                        </label>
+
+                        <input
+                            type="text"
+                            id="company"
+                            placeholder="Example: ABC Pharma"
+                        >
+
+                        <span class="help">
+                            Name of the manufacturer.
+                        </span>
+
+                    </div>
+
+
+                    <!-- PRICE -->
+
+                    <div class="form-group">
+
+                        <label for="price">
+                            Price (₹) *
+                        </label>
+
+                        <input
+                            type="number"
+                            id="price"
+                            placeholder="Example: 50"
+                            min="0"
+                            step="0.01"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- STOCK -->
+
+                    <div class="form-group">
+
+                        <label for="stock">
+                            Stock Quantity *
+                        </label>
+
+                        <input
+                            type="number"
+                            id="stock"
+                            placeholder="Example: 100"
+                            min="0"
+                            step="1"
+                            required
+                        >
+
+                        <span class="help">
+                            Current quantity available.
+                        </span>
+
+                    </div>
+
+
+                    <!-- LOW STOCK -->
+
+                    <div class="form-group">
+
+                        <label for="lowStock">
+                            Low Stock Limit *
+                        </label>
+
+                        <input
+                            type="number"
+                            id="lowStock"
+                            value="10"
+                            min="0"
+                            step="1"
+                            required
+                        >
+
+                        <span class="help">
+                            Warning appears when stock reaches this level.
+                        </span>
+
+                    </div>
+
+
+                    <!-- CATEGORY -->
+
+                    <div class="form-group">
+
+                        <label for="category">
+                            Medicine Category
+                        </label>
+
+                        <select id="category">
+
+                            <option value="">
+                                Select category
+                            </option>
+
+                            <option value="Tablet">
+                                Tablet
+                            </option>
+
+                            <option value="Capsule">
+                                Capsule
+                            </option>
+
+                            <option value="Syrup">
+                                Syrup
+                            </option>
+
+                            <option value="Injection">
+                                Injection
+                            </option>
+
+                            <option value="Cream">
+                                Cream
+                            </option>
+
+                            <option value="Drops">
+                                Drops
+                            </option>
+
+                            <option value="Other">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- NOTES -->
+
+                    <div class="form-group full">
+
+                        <label for="notes">
+                            Notes
+                        </label>
+
+                        <textarea
+                            id="notes"
+                            placeholder="Enter any additional information..."
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div class="buttons">
+
+                    <button
+                        type="submit"
+                        class="save-button"
+                        id="saveButton"
+                    >
+                        💾 Save Medicine
+                    </button>
+
+                    <button
+                        type="reset"
+                        class="clear-button"
+                    >
+                        Clear Form
+                    </button>
+
+                </div>
+
+
+                <!-- MESSAGE -->
+
+                <div
+                    id="message"
+                    class="message"
+                ></div>
+
+            </form>
+
+        </section>
+
+
+        <!-- =========================
+             PREVIEW
+        ========================= -->
+
+        <section class="preview">
+
+            <h3>
+                Medicine Preview
+            </h3>
+
+            <div class="preview-row">
+
+                <span class="preview-label">
+                    Medicine
+                </span>
+
+                <strong id="previewMedicine">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span class="preview-label">
+                    Company
+                </span>
+
+                <strong id="previewCompany">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span class="preview-label">
+                    Price
+                </span>
+
+                <strong id="previewPrice">
+                    ₹0.00
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span class="preview-label">
+                    Stock
+                </span>
+
+                <strong id="previewStock">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <span class="preview-label">
+                    Status
+                </span>
+
+                <strong id="previewStatus">
+                    —
+                </strong>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================= -->
+
+    <script>
+
+        /* =========================
+           USER INFORMATION
+        ========================= */
+
+        const userData =
+            localStorage.getItem("medicineCheckerUser");
+
+        if (!userData) {
+
+            window.location.href = "index.html";
+
+        }
+
+        let currentUser = null;
+
+        try {
+
+            currentUser = JSON.parse(userData);
+
+        } catch (error) {
+
+            localStorage.removeItem("medicineCheckerUser");
+
+            window.location.href = "index.html";
+
+        }
+
+
+        /* =========================
+           USER AVATAR
+        ========================= */
+
+        if (currentUser) {
+
+            const userName =
+                currentUser.name || "User";
+
+            document.getElementById(
+                "userAvatar"
+            ).textContent =
+                userName.charAt(0).toUpperCase();
+
+        }
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        function logout() {
+
+            localStorage.removeItem(
+                "medicineCheckerUser"
+            );
+
+            window.location.href = "index.html";
+
+        }
+
+
+        /* =========================
+           MOBILE MENU
+        ========================= */
+
+        function toggleMenu() {
+
+            document
+                .getElementById("sidebar")
+                .classList
+                .toggle("open");
+
+        }
+
+
+        /* =========================
+           FORM ELEMENTS
+        ========================= */
+
+        const form =
+            document.getElementById("medicineForm");
+
+        const medicineName =
+            document.getElementById("medicineName");
+
+        const company =
+            document.getElementById("company");
+
+        const price =
+            document.getElementById("price");
+
+        const stock =
+            document.getElementById("stock");
+
+        const lowStock =
+            document.getElementById("lowStock");
+
+        const category =
+            document.getElementById("category");
+
+        const notes =
+            document.getElementById("notes");
+
+        const saveButton =
+            document.getElementById("saveButton");
+
+        const message =
+            document.getElementById("message");
+
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        function showMessage(text, type) {
+
+            message.textContent = text;
+
+            message.className =
+                "message " + type;
+
+        }
+
+
+        function hideMessage() {
+
+            message.textContent = "";
+
+            message.className =
+                "message";
+
+        }
+
+
+        /* =========================
+           PREVIEW
+        ========================= */
+
+        function updatePreview() {
+
+            document.getElementById(
+                "previewMedicine"
+            ).textContent =
+                medicineName.value.trim() || "—";
+
+
+            document.getElementById(
+                "previewCompany"
+            ).textContent =
+                company.value.trim() || "—";
+
+
+            const priceValue =
+                Number(price.value || 0);
+
+            document.getElementById(
+                "previewPrice"
+            ).textContent =
+                "₹" + priceValue.toFixed(2);
+
+
+            const stockValue =
+                Number(stock.value || 0);
+
+            document.getElementById(
+                "previewStock"
+            ).textContent =
+                stock.value || "0";
+
+
+            const lowValue =
+                Number(lowStock.value || 10);
+
+
+            let status = "In Stock";
+
+
+            if (stockValue === 0) {
+
+                status = "Out Of Stock";
+
+            } else if (stockValue <= lowValue) {
+
+                status = "Low Stock";
+
+            }
+
+
+            document.getElementById(
+                "previewStatus"
+            ).textContent =
+                status;
+
+        }
+
+
+        /* =========================
+           LIVE PREVIEW
+        ========================= */
+
+        medicineName.addEventListener(
+            "input",
+            updatePreview
+        );
+
+        company.addEventListener(
+            "input",
+            updatePreview
+        );
+
+        price.addEventListener(
+            "input",
+            updatePreview
+        );
+
+        stock.addEventListener(
+            "input",
+            updatePreview
+        );
+
+        lowStock.addEventListener(
+            "input",
+            updatePreview
+        );
+
+
+        /* =========================
+           CLEAR FORM
+        ========================= */
+
+        form.addEventListener(
+            "reset",
+            function() {
+
+                setTimeout(function() {
+
+                    hideMessage();
+
+                    updatePreview();
+
+                }, 0);
+
+            }
+        );
+
+
+        /* =========================
+           SAVE MEDICINE TO DATABASE
+        ========================= */
+
+        form.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                hideMessage();
+
+
+                const medicineNameValue =
+                    medicineName.value.trim();
+
+                const companyValue =
+                    company.value.trim();
+
+                const priceValue =
+                    Number(price.value);
+
+                const stockValue =
+                    Number(stock.value);
+
+                const lowStockValue =
+                    Number(lowStock.value);
+
+                const categoryValue =
+                    category.value;
+
+                const notesValue =
+                    notes.value.trim();
+
+
+                /* VALIDATION */
+
+                if (!medicineNameValue) {
+
+                    showMessage(
+                        "Please enter the medicine name.",
+                        "error"
+                    );
+
+                    medicineName.focus();
+
+                    return;
+                }
+
+
+                if (
+                    !Number.isFinite(priceValue) ||
+                    priceValue < 0
+                ) {
+
+                    showMessage(
+                        "Please enter a valid price.",
+                        "error"
+                    );
+
+                    price.focus();
+
+                    return;
+                }
+
+
+                if (
+                    !Number.isInteger(stockValue) ||
+                    stockValue < 0
+                ) {
+
+                    showMessage(
+                        "Please enter a valid stock quantity.",
+                        "error"
+                    );
+
+                    stock.focus();
+
+                    return;
+                }
+
+
+                if (
+                    !Number.isInteger(lowStockValue) ||
+                    lowStockValue < 0
+                ) {
+
+                    showMessage(
+                        "Please enter a valid low stock limit.",
+                        "error"
+                    );
+
+                    lowStock.focus();
+
+                    return;
+                }
+
+
+                /* BUTTON LOADING */
+
+                saveButton.disabled = true;
+
+                saveButton.textContent =
+                    "Saving...";
+
+
+                try {
+
+                    /* SEND DATA TO NODE.JS */
+
+                    const response =
+                        await fetch(
+                            "/api/medicines",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+
+                                    medicine_name:
+                                        medicineNameValue,
+
+                                    company:
+                                        companyValue,
+
+                                    price:
+                                        priceValue,
+
+                                    stock:
+                                        stockValue,
+
+                                    low_stock_limit:
+                                        lowStockValue,
+
+                                    category:
+                                        categoryValue,
+
+                                    notes:
+                                        notesValue
+
+                                })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    /* SERVER ERROR */
+
+                    if (
+                        !response.ok ||
+                        !data.success
+                    ) {
+
+                        throw new Error(
+                            data.message ||
+                            "Unable to save medicine."
+                        );
+
+                    }
+
+
+                    /* SUCCESS */
+
+                    showMessage(
+                        "Medicine saved successfully! 💊",
+                        "success"
+                    );
+
+
+                    /* CLEAR FORM */
+
+                    form.reset();
+
+
+                    /* KEEP LOW STOCK DEFAULT */
+
+                    lowStock.value = 10;
+
+
+                    updatePreview();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Save medicine error:",
+                        error
+                    );
+
+
+                    showMessage(
+                        "Could not save medicine. " +
+                        error.message,
+                        "error"
+                    );
+
+                } finally {
+
+                    saveButton.disabled = false;
+
+                    saveButton.textContent =
+                        "💾 Save Medicine";
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           INITIAL PREVIEW
+        ========================= */
+
+        updatePreview();
+
+    </script>
+
+</body>
+</html>

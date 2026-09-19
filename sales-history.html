@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sales History - Medicine Checker</title>
+
+    <!-- LOGIN PROTECTION -->
+    <script>
+        const loggedInUser =
+            localStorage.getItem("medicineCheckerUser");
+
+        if (!loggedInUser) {
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #edf4fc;
+            color: #10244b;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 285px;
+            background: linear-gradient(180deg, #2864e8, #2149b9);
+            color: white;
+            padding: 28px 20px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .brand {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,.2);
+        }
+
+        .brand-logo {
+            width: 65px;
+            height: 65px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: #2864e8;
+            border-radius: 18px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .brand h2 {
+            margin-top: 18px;
+            font-size: 23px;
+        }
+
+        .brand p {
+            margin-top: 6px;
+            opacity: .8;
+            font-size: 14px;
+        }
+
+        .menu {
+            margin-top: 27px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .menu a.active {
+            background: white;
+            color: #2864e8;
+        }
+
+        .menu-icon {
+            width: 25px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 285px;
+            padding: 34px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 25px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .header h1 {
+            color: #2864e8;
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .header p {
+            color: #71809a;
+        }
+
+        .user {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dceaff;
+            color: #2864e8;
+            font-weight: bold;
+        }
+
+        /* CARD */
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #183b78;
+        }
+
+        .card-subtitle {
+            color: #71809a;
+            margin-top: 6px;
+            font-size: 14px;
+        }
+
+        /* SEARCH */
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            width: 420px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 13px 15px;
+            border: 1px solid #dce5f1;
+            border-radius: 10px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            border-color: #2864e8;
+            box-shadow: 0 0 0 4px rgba(40,100,232,.08);
+        }
+
+        .refresh-button {
+            border: none;
+            background: #2864e8;
+            color: white;
+            padding: 13px 17px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .refresh-button:hover {
+            background: #1e4fc1;
+        }
+
+        /* SUMMARY */
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .summary-box {
+            background: #f4f8ff;
+            border: 1px solid #dceaff;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .summary-label {
+            color: #71809a;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .summary-value {
+            color: #183b78;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* TABLE */
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e3eaf3;
+            border-radius: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        thead {
+            background: #f4f8ff;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px;
+            font-size: 13px;
+            color: #4d648b;
+            border-bottom: 1px solid #e3eaf3;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #edf1f6;
+            font-size: 14px;
+            color: #304a72;
+        }
+
+        tbody tr:hover {
+            background: #f9fbff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .medicine-name {
+            font-weight: bold;
+            color: #183b78;
+        }
+
+        .amount {
+            font-weight: bold;
+            color: #2864e8;
+        }
+
+        /* EMPTY */
+
+        .empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: #71809a;
+        }
+
+        .empty-icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        /* MESSAGE */
+
+        .message {
+            display: none;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .error {
+            background: #fff0f0;
+            color: #b42318;
+        }
+
+        /* MOBILE */
+
+        .mobile-button {
+            display: none;
+            position: fixed;
+            left: 15px;
+            top: 15px;
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 10px;
+            background: #2864e8;
+            color: white;
+            font-size: 22px;
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        @media(max-width: 850px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: .3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-button {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 18px;
+                padding-top: 75px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .card-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width: 500px) {
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .refresh-button {
+                width: 100%;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                M
+            </div>
+
+            <h2>Medicine Checker</h2>
+
+            <p>Admin Panel</p>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a href="dashboard.html">
+                <span class="menu-icon">🏠</span>
+                Dashboard
+            </a>
+
+            <a href="add-medicine.html">
+                <span class="menu-icon">➕</span>
+                Add Medicine
+            </a>
+
+            <a href="medicine-list.html">
+                <span class="menu-icon">💊</span>
+                Medicine List
+            </a>
+
+            <a href="sell-medicine.html">
+                <span class="menu-icon">💰</span>
+                Sell Medicine
+            </a>
+
+            <a href="sales-history.html" class="active">
+                <span class="menu-icon">📋</span>
+                Sales History
+            </a>
+
+            <a href="search-medicine.html">
+                <span class="menu-icon">🔍</span>
+                Search Medicine
+            </a>
+
+            <a href="reports.html">
+                <span class="menu-icon">📊</span>
+                Reports
+            </a>
+
+            <a href="about.html">
+                <span class="menu-icon">ℹ️</span>
+                About
+            </a>
+
+            <a href="#" onclick="logout(); return false;">
+                <span class="menu-icon">🚪</span>
+                Logout
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- MOBILE MENU -->
+
+    <button
+        class="mobile-button"
+        onclick="toggleMenu()"
+        aria-label="Open menu"
+    >
+        ☰
+    </button>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+        <section class="header">
+
+            <div>
+
+                <h1>Sales History</h1>
+
+                <p>
+                    View all completed medicine sales and revenue.
+                </p>
+
+            </div>
+
+            <div
+                class="user"
+                id="userAvatar"
+            >
+                A
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <div class="card-top">
+
+                <div>
+
+                    <div class="card-title">
+                        Medicine Sales
+                    </div>
+
+                    <div class="card-subtitle">
+                        Complete record of all medicine transactions
+                    </div>
+
+                </div>
+
+
+                <div class="search-box">
+
+                    <input
+                        type="text"
+                        id="search"
+                        placeholder="Search medicine or company..."
+                    >
+
+                    <button
+                        class="refresh-button"
+                        onclick="loadSales()"
+                    >
+                        🔄 Refresh
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="message"
+                class="message"
+            ></div>
+
+
+            <!-- SUMMARY -->
+
+            <div class="summary">
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Total Transactions
+                    </div>
+
+                    <div
+                        class="summary-value"
+                        id="totalTransactions"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div class="summary-box">
+
+                    <div class="summary-label">
+                        Total Revenue
+                    </div>
+
+                    <div
+                        class="summary-value"
+                        id="totalRevenue"
+                    >
+                        ₹0.00
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TABLE -->
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Sale ID
+                            </th>
+
+                            <th>
+                                Medicine
+                            </th>
+
+                            <th>
+                                Company
+                            </th>
+
+                            <th>
+                                Quantity
+                            </th>
+
+                            <th>
+                                Unit Price
+                            </th>
+
+                            <th>
+                                Total Amount
+                            </th>
+
+                            <th>
+                                Date & Time
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="salesTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        let sales = [];
+
+
+        /* =========================
+           GET LOGGED IN USER
+        ========================= */
+
+        let currentUser = null;
+
+        try {
+
+            currentUser =
+                JSON.parse(
+                    localStorage.getItem(
+                        "medicineCheckerUser"
+                    )
+                );
+
+        } catch (error) {
+
+            currentUser = null;
+
+        }
+
+
+        if (!currentUser) {
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* =========================
+           USER AVATAR
+        ========================= */
+
+        if (
+            currentUser &&
+            currentUser.name
+        ) {
+
+            document.getElementById(
+                "userAvatar"
+            ).textContent =
+                currentUser.name
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase();
+
+        }
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        function logout() {
+
+            localStorage.removeItem(
+                "medicineCheckerUser"
+            );
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* =========================
+           MOBILE MENU
+        ========================= */
+
+        function toggleMenu() {
+
+            document
+                .getElementById("sidebar")
+                .classList
+                .toggle("open");
+
+        }
+
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        function showError(text) {
+
+            const message =
+                document.getElementById("message");
+
+            message.textContent =
+                text;
+
+            message.className =
+                "message error";
+
+            message.style.display =
+                "block";
+
+        }
+
+
+        function hideMessage() {
+
+            const message =
+                document.getElementById("message");
+
+            message.style.display =
+                "none";
+
+        }
+
+
+        /* =========================
+           FORMAT DATE
+        ========================= */
+
+        function formatDate(dateString) {
+
+            const date =
+                new Date(
+                    dateString.replace(" ", "T") + "Z"
+                );
+
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return dateString;
+
+            }
+
+
+            return date.toLocaleString(
+                "en-IN",
+                {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+        }
+
+
+        /* =========================
+           LOAD SALES
+        ========================= */
+
+        async function loadSales() {
+
+            hideMessage();
+
+
+            const table =
+                document.getElementById(
+                    "salesTable"
+                );
+
+
+            table.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty">
+                        Loading sales...
+                    </td>
+                </tr>
+            `;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/sales"
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to load sales."
+                    );
+
+                }
+
+
+                sales =
+                    data.sales || [];
+
+
+                renderSales(
+                    sales
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+
+
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty">
+                            Unable to load sales.
+                        </td>
+                    </tr>
+                `;
+
+
+                showError(
+                    error.message
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           RENDER SALES
+        ========================= */
+
+        function renderSales(list) {
+
+            const table =
+                document.getElementById(
+                    "salesTable"
+                );
+
+
+            document.getElementById(
+                "totalTransactions"
+            ).textContent =
+                list.length;
+
+
+            const totalRevenue =
+                list.reduce(
+                    (sum, sale) =>
+                        sum +
+                        Number(
+                            sale.total_price || 0
+                        ),
+                    0
+                );
+
+
+            document.getElementById(
+                "totalRevenue"
+            ).textContent =
+                "₹" +
+                totalRevenue.toFixed(2);
+
+
+            if (
+                list.length === 0
+            ) {
+
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty">
+
+                            <div class="empty-icon">
+                                📋
+                            </div>
+
+                            No sales found.
+
+                        </td>
+                    </tr>
+                `;
+
+                return;
+
+            }
+
+
+            table.innerHTML =
+                list.map(
+                    sale => `
+
+                        <tr>
+
+                            <td>
+                                #${sale.id}
+                            </td>
+
+                            <td>
+                                <span class="medicine-name">
+                                    ${escapeHtml(
+                                        sale.medicine_name
+                                    )}
+                                </span>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    sale.company || "—"
+                                )}
+                            </td>
+
+                            <td>
+                                ${sale.quantity}
+                            </td>
+
+                            <td>
+                                ₹${Number(
+                                    sale.unit_price
+                                ).toFixed(2)}
+                            </td>
+
+                            <td>
+                                <span class="amount">
+                                    ₹${Number(
+                                        sale.total_price
+                                    ).toFixed(2)}
+                                </span>
+                            </td>
+
+                            <td>
+                                ${formatDate(
+                                    sale.sold_at
+                                )}
+                            </td>
+
+                        </tr>
+
+                    `
+                ).join("");
+
+        }
+
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        document
+            .getElementById("search")
+            .addEventListener(
+                "input",
+                function() {
+
+                    const searchText =
+                        this.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    const filtered =
+                        sales.filter(
+                            sale =>
+
+                                String(
+                                    sale.medicine_name || ""
+                                )
+                                .toLowerCase()
+                                .includes(
+                                    searchText
+                                )
+
+                                ||
+
+                                String(
+                                    sale.company || ""
+                                )
+                                .toLowerCase()
+                                .includes(
+                                    searchText
+                                )
+
+                                ||
+
+                                String(
+                                    sale.id
+                                )
+                                .includes(
+                                    searchText
+                                )
+                        );
+
+
+                    renderSales(
+                        filtered
+                    );
+
+                }
+            );
+
+
+        /* =========================
+           ESCAPE HTML
+        ========================= */
+
+        function escapeHtml(value) {
+
+            return String(value)
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        /* =========================
+           INITIAL LOAD
+        ========================= */
+
+        loadSales();
+
+    </script>
+
+</body>
+</html>

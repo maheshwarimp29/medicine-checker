@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- LOGIN PROTECTION -->
+    <script>
+        const loggedInUser =
+            localStorage.getItem("medicineCheckerUser");
+
+        if (!loggedInUser) {
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Medicine Availability Checker</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #edf4fc;
+            color: #10244b;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 285px;
+            background: linear-gradient(180deg, #2864e8, #2149b9);
+            color: white;
+            padding: 28px 20px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .brand {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,.2);
+        }
+
+        .brand-logo {
+            width: 65px;
+            height: 65px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: #2864e8;
+            border-radius: 18px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .brand h2 {
+            margin-top: 18px;
+            font-size: 23px;
+        }
+
+        .brand p {
+            margin-top: 6px;
+            opacity: .8;
+            font-size: 14px;
+        }
+
+        .menu {
+            margin-top: 27px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: .2s;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .menu a.active {
+            background: white;
+            color: #2864e8;
+            box-shadow: 0 8px 20px rgba(0,0,0,.08);
+        }
+
+        .menu-icon {
+            width: 25px;
+            font-size: 19px;
+            text-align: center;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 285px;
+            padding: 34px;
+        }
+
+        /* HEADER */
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 30px rgba(30,70,130,.08);
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            color: #2864e8;
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #71809a;
+            font-size: 14px;
+            margin-top: 3px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search {
+            width: 220px;
+            padding: 11px 13px;
+            border: 1px solid #dce5f1;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .search:focus {
+            border-color: #2864e8;
+            box-shadow: 0 0 0 4px rgba(40,100,232,.08);
+        }
+
+        .round-button {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: #edf4ff;
+            color: #2864e8;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .user {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dceaff;
+            color: #2864e8;
+            font-weight: bold;
+        }
+
+        /* STAT CARDS */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+            margin-bottom: 22px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .stat-title {
+            color: #637695;
+            font-size: 15px;
+            margin-bottom: 17px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #10244b;
+        }
+
+        .stat-icon {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        /* SALES CARDS */
+
+        .sales-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+            margin-bottom: 28px;
+        }
+
+        .sales-card {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+            border-left: 5px solid #2864e8;
+        }
+
+        .sales-card h3 {
+            font-size: 15px;
+            color: #637695;
+            margin-bottom: 10px;
+        }
+
+        .sales-card strong {
+            font-size: 30px;
+            color: #2864e8;
+        }
+
+        /* INVENTORY */
+
+        .inventory {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+            overflow-x: auto;
+        }
+
+        .inventory-header {
+            margin-bottom: 22px;
+        }
+
+        .inventory-header h2 {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .inventory-header p {
+            color: #71809a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th {
+            background: #2864e8;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #edf0f5;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background: #f8fbff;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .in-stock {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .low-stock {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .out-stock {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .action-button {
+            border: none;
+            background: #edf4ff;
+            color: #2864e8;
+            padding: 7px 11px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .empty-row {
+            text-align: center;
+            padding: 35px;
+            color: #71809a;
+        }
+
+        /* FOOTER */
+
+        footer {
+            text-align: center;
+            color: #71809a;
+            padding: 28px 0;
+            font-size: 13px;
+        }
+
+        /* MOBILE */
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 10px;
+            background: #2864e8;
+            color: white;
+            font-size: 22px;
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        @media(max-width:1100px) {
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media(max-width:750px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: .3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 18px;
+                padding-top: 75px;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .header {
+                display: block;
+                padding: 22px;
+            }
+
+            .header h1 {
+                font-size: 23px;
+            }
+
+            .header-right {
+                margin-top: 20px;
+                justify-content: space-between;
+            }
+
+            .search {
+                width: calc(100% - 105px);
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .sales-stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .inventory {
+                padding: 18px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                M
+            </div>
+
+            <h2>
+                Medicine Checker
+            </h2>
+
+            <p>
+                Admin Panel
+            </p>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a href="dashboard.html" class="active">
+                <span class="menu-icon">🏠</span>
+                Dashboard
+            </a>
+
+            <a href="add-medicine.html">
+                <span class="menu-icon">➕</span>
+                Add Medicine
+            </a>
+
+            <a href="medicine-list.html">
+                <span class="menu-icon">💊</span>
+                Medicine List
+            </a>
+
+            <a href="sell-medicine.html">
+                <span class="menu-icon">💰</span>
+                Sell Medicine
+            </a>
+
+            <a href="sales-history.html">
+                <span class="menu-icon">📋</span>
+                Sales History
+            </a>
+
+            <a href="search-medicine.html">
+                <span class="menu-icon">🔍</span>
+                Search Medicine
+            </a>
+
+            <a href="reports.html">
+                <span class="menu-icon">📊</span>
+                Reports
+            </a>
+
+            <a href="about.html">
+                <span class="menu-icon">ℹ️</span>
+                About
+            </a>
+
+            <a href="#" onclick="logout(); return false;">
+                <span class="menu-icon">🚪</span>
+                Logout
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- MOBILE BUTTON -->
+
+    <button
+        class="mobile-menu"
+        onclick="toggleMenu()"
+    >
+        ☰
+    </button>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- HEADER -->
+
+        <section class="header">
+
+            <div>
+
+                <h1>
+                    Medicine Availability Checker
+                </h1>
+
+                <p id="welcomeMessage">
+                    Welcome Admin 👋
+                </p>
+
+                <p>
+                    <span id="date"></span>
+                </p>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <input
+                    class="search"
+                    id="dashboardSearch"
+                    type="text"
+                    placeholder="Search medicine..."
+                >
+
+                <button
+                    class="round-button"
+                    onclick="loadDashboard()"
+                    title="Refresh dashboard"
+                >
+                    🔄
+                </button>
+
+                <div class="user" id="userAvatar">
+                    A
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- INVENTORY STATISTICS -->
+
+        <section class="stats">
+
+            <div class="card">
+
+                <div class="stat-icon">
+                    💊
+                </div>
+
+                <div class="stat-title">
+                    Total Medicines
+                </div>
+
+                <div
+                    class="stat-number"
+                    id="totalMedicines"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="stat-icon">
+                    ✅
+                </div>
+
+                <div class="stat-title">
+                    In Stock
+                </div>
+
+                <div
+                    class="stat-number"
+                    id="inStock"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="stat-icon">
+                    ⚠️
+                </div>
+
+                <div class="stat-title">
+                    Low Stock
+                </div>
+
+                <div
+                    class="stat-number"
+                    id="lowStock"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="stat-icon">
+                    ❌
+                </div>
+
+                <div class="stat-title">
+                    Out Of Stock
+                </div>
+
+                <div
+                    class="stat-number"
+                    id="outStock"
+                >
+                    —
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SALES STATISTICS -->
+
+        <section class="sales-stats">
+
+            <div class="sales-card">
+
+                <h3>
+                    Today's Sales
+                </h3>
+
+                <strong id="todaySales">
+                    0 medicines
+                </strong>
+
+            </div>
+
+
+            <div class="sales-card">
+
+                <h3>
+                    Today's Revenue
+                </h3>
+
+                <strong id="todayRevenue">
+                    ₹0.00
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- INVENTORY TABLE -->
+
+        <section class="inventory">
+
+            <div class="inventory-header">
+
+                <h2>
+                    Medicine Inventory
+                </h2>
+
+                <p>
+                    Current medicine stock information
+                </p>
+
+            </div>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ID
+                        </th>
+
+                        <th>
+                            Medicine
+                        </th>
+
+                        <th>
+                            Company
+                        </th>
+
+                        <th>
+                            Price
+                        </th>
+
+                        <th>
+                            Stock
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="inventoryTable">
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="empty-row"
+                        >
+                            Loading medicines...
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+
+        </section>
+
+
+        <footer>
+
+            © 2026 Medicine Availability Checker
+            | All Rights Reserved
+
+        </footer>
+
+
+    </main>
+
+
+    <script>
+
+        let medicines = [];
+
+
+        /* =========================
+           LOGIN USER
+        ========================= */
+
+        function getLoggedInUser() {
+
+            try {
+
+                return JSON.parse(
+                    localStorage.getItem(
+                        "medicineCheckerUser"
+                    )
+                );
+
+            } catch (error) {
+
+                return null;
+
+            }
+
+        }
+
+
+        const currentUser =
+            getLoggedInUser();
+
+
+        if (!currentUser) {
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* =========================
+           USER INFORMATION
+        ========================= */
+
+        function loadUserInformation() {
+
+            if (!currentUser) {
+                return;
+            }
+
+            const userName =
+                currentUser.name || "Admin";
+
+
+            document.getElementById(
+                "welcomeMessage"
+            ).textContent =
+                `Welcome ${userName} 👋`;
+
+
+            const firstLetter =
+                userName
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase();
+
+
+            document.getElementById(
+                "userAvatar"
+            ).textContent =
+                firstLetter || "A";
+
+        }
+
+
+        loadUserInformation();
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        function logout() {
+
+            localStorage.removeItem(
+                "medicineCheckerUser"
+            );
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* =========================
+           DATE
+        ========================= */
+
+        function updateDate() {
+
+            const now =
+                new Date();
+
+            document.getElementById(
+                "date"
+            ).textContent =
+                now.toLocaleString(
+                    "en-IN"
+                );
+
+        }
+
+        updateDate();
+
+
+        /* =========================
+           MOBILE MENU
+        ========================= */
+
+        function toggleMenu() {
+
+            document
+                .getElementById("sidebar")
+                .classList
+                .toggle("open");
+
+        }
+
+
+        /* =========================
+           ESCAPE HTML
+        ========================= */
+
+        function escapeHtml(value) {
+
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+        }
+
+
+        /* =========================
+           STATUS
+        ========================= */
+
+        function getStatus(medicine) {
+
+            const stock =
+                Number(medicine.stock);
+
+            const limit =
+                Number(
+                    medicine.low_stock_limit ?? 10
+                );
+
+
+            if (stock === 0) {
+
+                return {
+                    text: "Out Of Stock",
+                    className: "out-stock"
+                };
+
+            }
+
+
+            if (stock <= limit) {
+
+                return {
+                    text: "Low Stock",
+                    className: "low-stock"
+                };
+
+            }
+
+
+            return {
+                text: "In Stock",
+                className: "in-stock"
+            };
+
+        }
+
+
+        /* =========================
+           LOAD DASHBOARD
+        ========================= */
+
+        async function loadDashboard() {
+
+            try {
+
+                const dashboardResponse =
+                    await fetch(
+                        "/api/dashboard"
+                    );
+
+
+                const dashboardData =
+                    await dashboardResponse.json();
+
+
+                if (
+                    !dashboardResponse.ok ||
+                    !dashboardData.success
+                ) {
+
+                    throw new Error(
+                        dashboardData.message ||
+                        "Unable to load dashboard."
+                    );
+
+                }
+
+
+                const stats =
+                    dashboardData.stats;
+
+
+                document.getElementById(
+                    "totalMedicines"
+                ).textContent =
+                    stats.totalMedicines;
+
+
+                document.getElementById(
+                    "inStock"
+                ).textContent =
+                    stats.inStock;
+
+
+                document.getElementById(
+                    "lowStock"
+                ).textContent =
+                    stats.lowStock;
+
+
+                document.getElementById(
+                    "outStock"
+                ).textContent =
+                    stats.outOfStock;
+
+
+                document.getElementById(
+                    "todaySales"
+                ).textContent =
+                    `${stats.todaySales} medicines`;
+
+
+                document.getElementById(
+                    "todayRevenue"
+                ).textContent =
+                    "₹" +
+                    Number(
+                        stats.todayRevenue || 0
+                    ).toFixed(2);
+
+
+                /* Load inventory */
+
+                const medicineResponse =
+                    await fetch(
+                        "/api/medicines"
+                    );
+
+
+                const medicineData =
+                    await medicineResponse.json();
+
+
+                if (
+                    !medicineResponse.ok ||
+                    !medicineData.success
+                ) {
+
+                    throw new Error(
+                        medicineData.message ||
+                        "Unable to load medicines."
+                    );
+
+                }
+
+
+                medicines =
+                    medicineData.medicines || [];
+
+
+                renderInventory(
+                    medicines
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                document.getElementById(
+                    "inventoryTable"
+                ).innerHTML = `
+                    <tr>
+                        <td
+                            colspan="7"
+                            class="empty-row"
+                        >
+                            Unable to load dashboard data.
+                        </td>
+                    </tr>
+                `;
+
+            }
+
+        }
+
+
+        /* =========================
+           RENDER INVENTORY
+        ========================= */
+
+        function renderInventory(list) {
+
+            const table =
+                document.getElementById(
+                    "inventoryTable"
+                );
+
+
+            if (list.length === 0) {
+
+                table.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="7"
+                            class="empty-row"
+                        >
+                            No medicines found.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+
+            }
+
+
+            table.innerHTML =
+                list.map(
+                    medicine => {
+
+                        const status =
+                            getStatus(
+                                medicine
+                            );
+
+
+                        return `
+
+                            <tr>
+
+                                <td>
+                                    #${medicine.id}
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        ${escapeHtml(
+                                            medicine.medicine_name
+                                        )}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    ${escapeHtml(
+                                        medicine.company || "—"
+                                    )}
+                                </td>
+
+                                <td>
+                                    ₹${Number(
+                                        medicine.price
+                                    ).toFixed(2)}
+                                </td>
+
+                                <td>
+                                    ${medicine.stock}
+                                </td>
+
+                                <td>
+
+                                    <span
+                                        class="status ${status.className}"
+                                    >
+                                        ${status.text}
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <button
+                                        class="action-button"
+                                        onclick="sellMedicine(${medicine.id})"
+                                    >
+                                        Sell
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                ).join("");
+
+        }
+
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        document
+            .getElementById(
+                "dashboardSearch"
+            )
+            .addEventListener(
+                "input",
+                function() {
+
+                    const searchText =
+                        this.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    const filtered =
+                        medicines.filter(
+                            medicine =>
+
+                                String(
+                                    medicine.medicine_name || ""
+                                )
+                                .toLowerCase()
+                                .includes(
+                                    searchText
+                                )
+
+                                ||
+
+                                String(
+                                    medicine.company || ""
+                                )
+                                .toLowerCase()
+                                .includes(
+                                    searchText
+                                )
+
+                                ||
+
+                                String(
+                                    medicine.category || ""
+                                )
+                                .toLowerCase()
+                                .includes(
+                                    searchText
+                                )
+                        );
+
+
+                    renderInventory(
+                        filtered
+                    );
+
+                }
+            );
+
+
+        /* =========================
+           SELL BUTTON
+        ========================= */
+
+        function sellMedicine(id) {
+
+            window.location.href =
+                `sell-medicine.html?medicine=${id}`;
+
+        }
+
+
+        /* =========================
+           INITIAL LOAD
+        ========================= */
+
+        loadDashboard();
+
+
+        /* Refresh dashboard every 30 seconds */
+
+        setInterval(
+            loadDashboard,
+            30000
+        );
+
+    </script>
+
+</body>
+
+</html>

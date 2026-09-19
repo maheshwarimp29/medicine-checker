@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sell Medicine - Medicine Checker</title>
+
+    <!-- LOGIN PROTECTION -->
+    <script>
+        const loggedInUser =
+            localStorage.getItem("medicineCheckerUser");
+
+        if (!loggedInUser) {
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #edf4fc;
+            color: #10244b;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 285px;
+            background: linear-gradient(180deg, #2864e8, #2149b9);
+            color: white;
+            padding: 28px 20px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .brand {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,.2);
+        }
+
+        .brand-logo {
+            width: 65px;
+            height: 65px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: #2864e8;
+            border-radius: 18px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .brand h2 {
+            margin-top: 18px;
+            font-size: 23px;
+        }
+
+        .brand p {
+            margin-top: 6px;
+            opacity: .8;
+            font-size: 14px;
+        }
+
+        .menu {
+            margin-top: 27px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .menu a.active {
+            background: white;
+            color: #2864e8;
+        }
+
+        .menu-icon {
+            width: 25px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 285px;
+            padding: 34px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 25px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .header h1 {
+            color: #2864e8;
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .header p {
+            color: #71809a;
+        }
+
+        .user {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dceaff;
+            color: #2864e8;
+            font-weight: bold;
+        }
+
+        /* CARD */
+
+        .card {
+            max-width: 850px;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #183b78;
+            margin-bottom: 25px;
+        }
+
+        /* FORM */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #304a72;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #dce5f1;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2864e8;
+            box-shadow: 0 0 0 4px rgba(40,100,232,.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* MEDICINE INFO */
+
+        .medicine-info {
+            display: none;
+            background: #f4f8ff;
+            border: 1px solid #dceaff;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .medicine-info.show {
+            display: block;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #2864e8;
+            margin-bottom: 15px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 13px;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            display: block;
+            font-size: 12px;
+            color: #71809a;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: #183b78;
+        }
+
+        /* TOTAL */
+
+        .total-box {
+            background: linear-gradient(135deg, #2864e8, #2149b9);
+            color: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin: 25px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-label {
+            font-size: 15px;
+            opacity: .9;
+        }
+
+        .total-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* BUTTON */
+
+        .sell-button {
+            width: 100%;
+            border: none;
+            background: #2864e8;
+            color: white;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .sell-button:hover {
+            background: #1e4fc1;
+        }
+
+        .sell-button:disabled {
+            background: #aab8ce;
+            cursor: not-allowed;
+        }
+
+        /* MESSAGE */
+
+        .message {
+            display: none;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #e9f8ef;
+            color: #18743b;
+        }
+
+        .error {
+            background: #fff0f0;
+            color: #b42318;
+        }
+
+        /* MOBILE */
+
+        .mobile-button {
+            display: none;
+            position: fixed;
+            left: 15px;
+            top: 15px;
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 10px;
+            background: #2864e8;
+            color: white;
+            font-size: 22px;
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        @media(max-width:750px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: .3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-button {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 18px;
+                padding-top: 75px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .total-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                M
+            </div>
+
+            <h2>Medicine Checker</h2>
+
+            <p>Admin Panel</p>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a href="dashboard.html">
+                <span class="menu-icon">🏠</span>
+                Dashboard
+            </a>
+
+            <a href="add-medicine.html">
+                <span class="menu-icon">➕</span>
+                Add Medicine
+            </a>
+
+            <a href="medicine-list.html">
+                <span class="menu-icon">💊</span>
+                Medicine List
+            </a>
+
+            <a href="sell-medicine.html" class="active">
+                <span class="menu-icon">💰</span>
+                Sell Medicine
+            </a>
+
+            <a href="sales-history.html">
+                <span class="menu-icon">📋</span>
+                Sales History
+            </a>
+
+            <a href="search-medicine.html">
+                <span class="menu-icon">🔍</span>
+                Search Medicine
+            </a>
+
+            <a href="reports.html">
+                <span class="menu-icon">📊</span>
+                Reports
+            </a>
+
+            <a href="about.html">
+                <span class="menu-icon">ℹ️</span>
+                About
+            </a>
+
+            <a href="#" onclick="logout(); return false;">
+                <span class="menu-icon">🚪</span>
+                Logout
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- MOBILE MENU -->
+
+    <button
+        class="mobile-button"
+        onclick="toggleMenu()"
+        aria-label="Open menu"
+    >
+        ☰
+    </button>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+        <section class="header">
+
+            <div>
+
+                <h1>Sell Medicine</h1>
+
+                <p>
+                    Record a medicine sale and automatically update stock.
+                </p>
+
+            </div>
+
+            <div class="user" id="userAvatar">
+                A
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <div class="card-title">
+                New Medicine Sale
+            </div>
+
+
+            <div
+                id="message"
+                class="message"
+            ></div>
+
+
+            <!-- MEDICINE -->
+
+            <div class="form-group">
+
+                <label for="medicine">
+                    Select Medicine *
+                </label>
+
+                <select id="medicine">
+
+                    <option value="">
+                        Loading medicines...
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- MEDICINE INFORMATION -->
+
+            <div
+                class="medicine-info"
+                id="medicineInfo"
+            >
+
+                <div class="info-title">
+                    Medicine Information
+                </div>
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            Company
+                        </span>
+
+                        <span
+                            class="info-value"
+                            id="company"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            Price
+                        </span>
+
+                        <span
+                            class="info-value"
+                            id="price"
+                        >
+                            ₹0.00
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            Available Stock
+                        </span>
+
+                        <span
+                            class="info-value"
+                            id="stock"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUANTITY -->
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label for="quantity">
+                        Quantity *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="quantity"
+                        min="1"
+                        value="1"
+                        placeholder="Enter quantity"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Sale Total
+                    </label>
+
+                    <div class="total-box">
+
+                        <span class="total-label">
+                            Total Amount
+                        </span>
+
+                        <span
+                            class="total-value"
+                            id="total"
+                        >
+                            ₹0.00
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="sell-button"
+                id="sellButton"
+                onclick="sellMedicine()"
+            >
+                💰 Complete Sale
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        let medicines = [];
+
+        let selectedMedicine = null;
+
+
+        /* =========================
+           GET LOGGED IN USER
+        ========================= */
+
+        let currentUser = null;
+
+        try {
+
+            currentUser =
+                JSON.parse(
+                    localStorage.getItem(
+                        "medicineCheckerUser"
+                    )
+                );
+
+        } catch (error) {
+
+            currentUser = null;
+
+        }
+
+
+        if (!currentUser) {
+
+            window.location.href = "index.html";
+
+        }
+
+
+        /* =========================
+           USER AVATAR
+        ========================= */
+
+        if (
+            currentUser &&
+            currentUser.name
+        ) {
+
+            document.getElementById(
+                "userAvatar"
+            ).textContent =
+                currentUser.name
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase();
+
+        }
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        function logout() {
+
+            localStorage.removeItem(
+                "medicineCheckerUser"
+            );
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* =========================
+           MOBILE MENU
+        ========================= */
+
+        function toggleMenu() {
+
+            document
+                .getElementById("sidebar")
+                .classList
+                .toggle("open");
+
+        }
+
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        function showMessage(text, type) {
+
+            const message =
+                document.getElementById("message");
+
+            message.textContent = text;
+
+            message.className =
+                "message " + type;
+
+            message.style.display = "block";
+
+        }
+
+
+        function hideMessage() {
+
+            const message =
+                document.getElementById("message");
+
+            message.style.display = "none";
+
+        }
+
+
+        /* =========================
+           LOAD MEDICINES
+        ========================= */
+
+        async function loadMedicines() {
+
+            const select =
+                document.getElementById("medicine");
+
+            try {
+
+                const response =
+                    await fetch("/api/medicines");
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok || !data.success) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to load medicines."
+                    );
+
+                }
+
+
+                medicines =
+                    data.medicines || [];
+
+
+                select.innerHTML =
+                    `<option value="">
+                        Select a medicine
+                    </option>`;
+
+
+                const availableMedicines =
+                    medicines.filter(
+                        medicine =>
+                            Number(medicine.stock) > 0
+                    );
+
+
+                availableMedicines.forEach(
+                    medicine => {
+
+                        const option =
+                            document.createElement(
+                                "option"
+                            );
+
+                        option.value =
+                            medicine.id;
+
+                        option.textContent =
+                            `${medicine.medicine_name} — Stock: ${medicine.stock}`;
+
+                        select.appendChild(option);
+
+                    }
+                );
+
+
+                if (
+                    availableMedicines.length === 0
+                ) {
+
+                    select.innerHTML =
+                        `<option value="">
+                            No medicines currently in stock
+                        </option>`;
+
+                }
+
+
+                /* =========================
+                   OPEN MEDICINE FROM URL
+                   Example:
+                   sell-medicine.html?medicine=5
+                   ========================= */
+
+                const params =
+                    new URLSearchParams(
+                        window.location.search
+                    );
+
+                const medicineId =
+                    Number(
+                        params.get("medicine")
+                    );
+
+
+                if (
+                    medicineId &&
+                    availableMedicines.some(
+                        medicine =>
+                            Number(medicine.id) ===
+                            medicineId
+                    )
+                ) {
+
+                    select.value =
+                        medicineId;
+
+                    select.dispatchEvent(
+                        new Event("change")
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                select.innerHTML =
+                    `<option value="">
+                        Unable to load medicines
+                    </option>`;
+
+                showMessage(
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           MEDICINE SELECT
+        ========================= */
+
+        document
+            .getElementById("medicine")
+            .addEventListener(
+                "change",
+                function() {
+
+                    const id =
+                        Number(this.value);
+
+
+                    selectedMedicine =
+                        medicines.find(
+                            medicine =>
+                                Number(medicine.id) === id
+                        );
+
+
+                    const info =
+                        document.getElementById(
+                            "medicineInfo"
+                        );
+
+
+                    if (!selectedMedicine) {
+
+                        info.classList.remove("show");
+
+                        document.getElementById(
+                            "total"
+                        ).textContent =
+                            "₹0.00";
+
+                        return;
+
+                    }
+
+
+                    info.classList.add("show");
+
+
+                    document.getElementById(
+                        "company"
+                    ).textContent =
+                        selectedMedicine.company || "—";
+
+
+                    document.getElementById(
+                        "price"
+                    ).textContent =
+                        "₹" +
+                        Number(
+                            selectedMedicine.price
+                        ).toFixed(2);
+
+
+                    document.getElementById(
+                        "stock"
+                    ).textContent =
+                        selectedMedicine.stock;
+
+
+                    document.getElementById(
+                        "quantity"
+                    ).value = 1;
+
+
+                    calculateTotal();
+
+                    hideMessage();
+
+                }
+            );
+
+
+        /* =========================
+           CALCULATE TOTAL
+        ========================= */
+
+        document
+            .getElementById("quantity")
+            .addEventListener(
+                "input",
+                calculateTotal
+            );
+
+
+        function calculateTotal() {
+
+            if (!selectedMedicine) {
+
+                document.getElementById(
+                    "total"
+                ).textContent =
+                    "₹0.00";
+
+                return;
+
+            }
+
+
+            let quantity =
+                Number(
+                    document.getElementById(
+                        "quantity"
+                    ).value
+                );
+
+
+            if (
+                !Number.isFinite(quantity) ||
+                quantity < 0
+            ) {
+
+                quantity = 0;
+
+            }
+
+
+            const total =
+                quantity *
+                Number(
+                    selectedMedicine.price
+                );
+
+
+            document.getElementById(
+                "total"
+            ).textContent =
+                "₹" +
+                total.toFixed(2);
+
+        }
+
+
+        /* =========================
+           SELL MEDICINE
+        ========================= */
+
+        async function sellMedicine() {
+
+            hideMessage();
+
+
+            if (!selectedMedicine) {
+
+                showMessage(
+                    "Please select a medicine.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const quantity =
+                Number(
+                    document.getElementById(
+                        "quantity"
+                    ).value
+                );
+
+
+            if (
+                !Number.isInteger(quantity) ||
+                quantity <= 0
+            ) {
+
+                showMessage(
+                    "Please enter a valid quantity.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            if (
+                quantity >
+                Number(
+                    selectedMedicine.stock
+                )
+            ) {
+
+                showMessage(
+                    `Only ${selectedMedicine.stock} units are available.`,
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const button =
+                document.getElementById(
+                    "sellButton"
+                );
+
+
+            button.disabled = true;
+
+            button.textContent =
+                "Processing Sale...";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/sales",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                medicine_id:
+                                    selectedMedicine.id,
+
+                                quantity:
+                                    quantity
+
+                            })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Sale could not be completed."
+                    );
+
+                }
+
+
+                showMessage(
+                    `Sale completed successfully! ${quantity} × ${selectedMedicine.medicine_name} sold for ₹${Number(data.sale.total_price).toFixed(2)}.`,
+                    "success"
+                );
+
+
+                document.getElementById(
+                    "medicine"
+                ).value = "";
+
+
+                document.getElementById(
+                    "quantity"
+                ).value = 1;
+
+
+                document.getElementById(
+                    "total"
+                ).textContent =
+                    "₹0.00";
+
+
+                document.getElementById(
+                    "medicineInfo"
+                ).classList.remove("show");
+
+
+                selectedMedicine = null;
+
+
+                await loadMedicines();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                showMessage(
+                    error.message ||
+                    "Unable to complete sale.",
+                    "error"
+                );
+
+            } finally {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "💰 Complete Sale";
+
+            }
+
+        }
+
+
+        /* =========================
+           INITIAL LOAD
+        ========================= */
+
+        loadMedicines();
+
+    </script>
+
+</body>
+</html>

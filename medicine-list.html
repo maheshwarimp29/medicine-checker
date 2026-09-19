@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Medicine List - Medicine Checker</title>
+
+    <!-- LOGIN PROTECTION -->
+    <script>
+        const loggedInUser =
+            localStorage.getItem("medicineCheckerUser");
+
+        if (!loggedInUser) {
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #edf4fc;
+            color: #10244b;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 285px;
+            background: linear-gradient(180deg, #2864e8, #2149b9);
+            color: white;
+            padding: 28px 20px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .brand {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,.2);
+        }
+
+        .brand-logo {
+            width: 65px;
+            height: 65px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: #2864e8;
+            border-radius: 18px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .brand h2 {
+            margin-top: 18px;
+            font-size: 23px;
+        }
+
+        .brand p {
+            margin-top: 6px;
+            opacity: .8;
+            font-size: 14px;
+        }
+
+        .menu {
+            margin-top: 27px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .menu a.active {
+            background: white;
+            color: #2864e8;
+        }
+
+        .menu-icon {
+            width: 25px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 285px;
+            padding: 34px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 25px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .header h1 {
+            color: #2864e8;
+            font-size: 28px;
+            margin-bottom: 7px;
+        }
+
+        .header p {
+            color: #71809a;
+        }
+
+        .user {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dceaff;
+            color: #2864e8;
+            font-weight: bold;
+        }
+
+        /* CONTENT CARD */
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(30,70,130,.07);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #dce5f1;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .search-box input:focus {
+            border-color: #2864e8;
+            box-shadow: 0 0 0 4px rgba(40,100,232,.08);
+        }
+
+        .refresh-button {
+            border: none;
+            background: #2864e8;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .refresh-button:hover {
+            background: #1e4fc1;
+        }
+
+        /* TABLE */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th {
+            background: #f4f7fc;
+            color: #526985;
+            text-align: left;
+            padding: 15px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 16px 15px;
+            border-bottom: 1px solid #edf1f7;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        tr:hover td {
+            background: #fafcff;
+        }
+
+        .medicine-name {
+            font-weight: bold;
+            color: #183b78;
+        }
+
+        .company {
+            color: #71809a;
+        }
+
+        /* STATUS */
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .in-stock {
+            background: #e9f8ef;
+            color: #18743b;
+        }
+
+        .low-stock {
+            background: #fff5df;
+            color: #a15c00;
+        }
+
+        .out-stock {
+            background: #fff0f0;
+            color: #b42318;
+        }
+
+        /* EMPTY / LOADING */
+
+        .message {
+            text-align: center;
+            padding: 45px 20px;
+            color: #71809a;
+        }
+
+        .message-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        /* MOBILE */
+
+        .mobile-button {
+            display: none;
+            position: fixed;
+            left: 15px;
+            top: 15px;
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 10px;
+            background: #2864e8;
+            color: white;
+            font-size: 22px;
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        @media(max-width:750px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: .3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .mobile-button {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 18px;
+                padding-top: 75px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .refresh-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                M
+            </div>
+
+            <h2>Medicine Checker</h2>
+
+            <p>Admin Panel</p>
+
+        </div>
+
+        <nav class="menu">
+
+            <a href="dashboard.html">
+                <span class="menu-icon">🏠</span>
+                Dashboard
+            </a>
+
+            <a href="add-medicine.html">
+                <span class="menu-icon">➕</span>
+                Add Medicine
+            </a>
+
+            <a href="medicine-list.html" class="active">
+                <span class="menu-icon">💊</span>
+                Medicine List
+            </a>
+
+            <a href="sell-medicine.html">
+                <span class="menu-icon">💰</span>
+                Sell Medicine
+            </a>
+
+            <a href="sales-history.html">
+                <span class="menu-icon">📋</span>
+                Sales History
+            </a>
+
+            <a href="search-medicine.html">
+                <span class="menu-icon">🔍</span>
+                Search Medicine
+            </a>
+
+            <a href="reports.html">
+                <span class="menu-icon">📊</span>
+                Reports
+            </a>
+
+            <a href="about.html">
+                <span class="menu-icon">ℹ️</span>
+                About
+            </a>
+
+            <a href="#" onclick="logout(); return false;">
+                <span class="menu-icon">🚪</span>
+                Logout
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- MOBILE MENU -->
+
+    <button
+        class="mobile-button"
+        onclick="toggleMenu()"
+        aria-label="Open menu"
+    >
+        ☰
+    </button>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+        <section class="header">
+
+            <div>
+
+                <h1>Medicine List</h1>
+
+                <p>
+                    View and search all medicines in your inventory.
+                </p>
+
+            </div>
+
+            <div class="user" id="userAvatar">
+                U
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <!-- TOOLBAR -->
+
+            <div class="toolbar">
+
+                <div class="search-box">
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="🔍 Search medicine or company..."
+                    >
+
+                </div>
+
+                <button
+                    class="refresh-button"
+                    onclick="loadMedicines()"
+                >
+                    🔄 Refresh
+                </button>
+
+            </div>
+
+
+            <!-- TABLE -->
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Medicine</th>
+
+                            <th>Company</th>
+
+                            <th>Category</th>
+
+                            <th>Price</th>
+
+                            <th>Stock</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="medicineTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- MESSAGE -->
+
+            <div
+                class="message"
+                id="message"
+            >
+
+                <div class="message-icon">
+                    💊
+                </div>
+
+                <div>
+                    Loading medicines...
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        /* =========================
+           USER / LOGIN PROTECTION
+        ========================= */
+
+        const userData =
+            localStorage.getItem("medicineCheckerUser");
+
+        if (!userData) {
+
+            window.location.href = "index.html";
+
+        }
+
+
+        let currentUser = null;
+
+        try {
+
+            currentUser =
+                JSON.parse(userData);
+
+        } catch (error) {
+
+            localStorage.removeItem(
+                "medicineCheckerUser"
+            );
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* =========================
+           USER AVATAR
+        ========================= */
+
+        if (currentUser) {
+
+            const userName =
+                currentUser.name || "User";
+
+            document.getElementById(
+                "userAvatar"
+            ).textContent =
+                userName
+                    .charAt(0)
+                    .toUpperCase();
+
+        }
+
+
+        /* =========================
+           LOGOUT
+        ========================= */
+
+        function logout() {
+
+            localStorage.removeItem(
+                "medicineCheckerUser"
+            );
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        /* =========================
+           MOBILE MENU
+        ========================= */
+
+        function toggleMenu() {
+
+            document
+                .getElementById("sidebar")
+                .classList
+                .toggle("open");
+
+        }
+
+
+        let allMedicines = [];
+
+
+        /* =========================
+           LOAD MEDICINES
+        ========================= */
+
+        async function loadMedicines() {
+
+            const table =
+                document.getElementById(
+                    "medicineTable"
+                );
+
+            const message =
+                document.getElementById(
+                    "message"
+                );
+
+
+            table.innerHTML = "";
+
+            message.style.display =
+                "block";
+
+            message.innerHTML = `
+                <div class="message-icon">⏳</div>
+                <div>Loading medicines...</div>
+            `;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/medicines"
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to load medicines."
+                    );
+
+                }
+
+
+                allMedicines =
+                    data.medicines || [];
+
+
+                displayMedicines(
+                    allMedicines
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Load medicines error:",
+                    error
+                );
+
+                message.style.display =
+                    "block";
+
+                message.innerHTML = `
+                    <div class="message-icon">⚠️</div>
+                    <div>
+                        Could not load medicines.<br>
+                        ${escapeHtml(
+                            error.message
+                        )}
+                    </div>
+                `;
+
+            }
+
+        }
+
+
+        /* =========================
+           DISPLAY MEDICINES
+        ========================= */
+
+        function displayMedicines(
+            medicines
+        ) {
+
+            const table =
+                document.getElementById(
+                    "medicineTable"
+                );
+
+            const message =
+                document.getElementById(
+                    "message"
+                );
+
+
+            table.innerHTML = "";
+
+
+            if (!medicines.length) {
+
+                message.style.display =
+                    "block";
+
+                message.innerHTML = `
+                    <div class="message-icon">💊</div>
+                    <div>No medicines found.</div>
+                `;
+
+                return;
+
+            }
+
+
+            message.style.display =
+                "none";
+
+
+            medicines.forEach(
+                function(medicine, index) {
+
+                    const status =
+                        getStatus(
+                            medicine
+                        );
+
+
+                    const row =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    row.innerHTML = `
+
+                        <td>
+                            ${index + 1}
+                        </td>
+
+                        <td class="medicine-name">
+                            ${escapeHtml(
+                                medicine.medicine_name
+                            )}
+                        </td>
+
+                        <td class="company">
+                            ${escapeHtml(
+                                medicine.company || "—"
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                medicine.category || "—"
+                            )}
+                        </td>
+
+                        <td>
+                            ₹${Number(
+                                medicine.price
+                            ).toFixed(2)}
+                        </td>
+
+                        <td>
+                            ${medicine.stock}
+                        </td>
+
+                        <td>
+                            <span class="status ${status.className}">
+                                ${status.text}
+                            </span>
+                        </td>
+
+                    `;
+
+
+                    table.appendChild(
+                        row
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =========================
+           STATUS
+        ========================= */
+
+        function getStatus(
+            medicine
+        ) {
+
+            const stock =
+                Number(
+                    medicine.stock
+                );
+
+            const limit =
+                Number(
+                    medicine.low_stock_limit || 10
+                );
+
+
+            if (stock === 0) {
+
+                return {
+                    text: "Out Of Stock",
+                    className: "out-stock"
+                };
+
+            }
+
+
+            if (stock <= limit) {
+
+                return {
+                    text: "Low Stock",
+                    className: "low-stock"
+                };
+
+            }
+
+
+            return {
+                text: "In Stock",
+                className: "in-stock"
+            };
+
+        }
+
+
+        /* =========================
+           SEARCH
+        ========================= */
+
+        document
+            .getElementById(
+                "searchInput"
+            )
+            .addEventListener(
+                "input",
+                function() {
+
+                    const search =
+                        this.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    if (!search) {
+
+                        displayMedicines(
+                            allMedicines
+                        );
+
+                        return;
+
+                    }
+
+
+                    const filtered =
+                        allMedicines.filter(
+                            function(
+                                medicine
+                            ) {
+
+                                return (
+
+                                    String(
+                                        medicine.medicine_name
+                                    )
+                                    .toLowerCase()
+                                    .includes(
+                                        search
+                                    )
+
+                                    ||
+
+                                    String(
+                                        medicine.company || ""
+                                    )
+                                    .toLowerCase()
+                                    .includes(
+                                        search
+                                    )
+
+                                    ||
+
+                                    String(
+                                        medicine.category || ""
+                                    )
+                                    .toLowerCase()
+                                    .includes(
+                                        search
+                                    )
+
+                                );
+
+                            }
+                        );
+
+
+                    displayMedicines(
+                        filtered
+                    );
+
+                }
+            );
+
+
+        /* =========================
+           HTML SAFETY
+        ========================= */
+
+        function escapeHtml(
+            value
+        ) {
+
+            return String(value)
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        /* =========================
+           INITIAL LOAD
+        ========================= */
+
+        loadMedicines();
+
+    </script>
+
+</body>
+</html>
