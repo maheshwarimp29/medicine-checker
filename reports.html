@@ -772,7 +772,9 @@
       try {
 
         const dashboardResponse =
-          await fetch("/api/dashboard");
+          await fetch(
+            "https://medicine-checker.onrender.com/api/dashboard"
+          );
 
         const dashboardData =
           await dashboardResponse.json();
@@ -850,7 +852,9 @@
 
         /* MEDICINES */
         const medicineResponse =
-          await fetch("/api/medicines");
+          await fetch(
+            "https://medicine-checker.onrender.com/api/medicines"
+          );
 
         const medicineData =
           await medicineResponse.json();
@@ -892,7 +896,9 @@
 
         /* SALES */
         const salesResponse =
-          await fetch("/api/sales");
+          await fetch(
+            "https://medicine-checker.onrender.com/api/sales"
+          );
 
         const salesData =
           await salesResponse.json();
