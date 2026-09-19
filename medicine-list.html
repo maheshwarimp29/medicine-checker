@@ -6,7 +6,6 @@
 
     <title>Medicine List - Medicine Checker</title>
 
-    <!-- LOGIN PROTECTION -->
     <script>
         const loggedInUser =
             localStorage.getItem("medicineCheckerUser");
@@ -28,8 +27,6 @@
             background: #edf4fc;
             color: #10244b;
         }
-
-        /* SIDEBAR */
 
         .sidebar {
             position: fixed;
@@ -106,8 +103,6 @@
             font-size: 18px;
         }
 
-        /* MAIN */
-
         .main {
             margin-left: 285px;
             padding: 34px;
@@ -145,8 +140,6 @@
             color: #2864e8;
             font-weight: bold;
         }
-
-        /* CONTENT CARD */
 
         .card {
             background: white;
@@ -196,8 +189,6 @@
             background: #1e4fc1;
         }
 
-        /* TABLE */
-
         .table-wrapper {
             overflow-x: auto;
         }
@@ -237,8 +228,6 @@
             color: #71809a;
         }
 
-        /* STATUS */
-
         .status {
             display: inline-block;
             padding: 6px 10px;
@@ -262,8 +251,6 @@
             color: #b42318;
         }
 
-        /* EMPTY / LOADING */
-
         .message {
             text-align: center;
             padding: 45px 20px;
@@ -274,8 +261,6 @@
             font-size: 40px;
             margin-bottom: 12px;
         }
-
-        /* MOBILE */
 
         .mobile-button {
             display: none;
@@ -339,8 +324,6 @@
 </head>
 
 <body>
-
-    <!-- SIDEBAR -->
 
     <aside class="sidebar" id="sidebar">
 
@@ -407,9 +390,6 @@
 
     </aside>
 
-
-    <!-- MOBILE MENU -->
-
     <button
         class="mobile-button"
         onclick="toggleMenu()"
@@ -417,9 +397,6 @@
     >
         ☰
     </button>
-
-
-    <!-- MAIN -->
 
     <main class="main">
 
@@ -441,10 +418,7 @@
 
         </section>
 
-
         <section class="card">
-
-            <!-- TOOLBAR -->
 
             <div class="toolbar">
 
@@ -467,9 +441,6 @@
 
             </div>
 
-
-            <!-- TABLE -->
-
             <div class="table-wrapper">
 
                 <table>
@@ -479,17 +450,11 @@
                         <tr>
 
                             <th>#</th>
-
                             <th>Medicine</th>
-
                             <th>Company</th>
-
                             <th>Category</th>
-
                             <th>Price</th>
-
                             <th>Stock</th>
-
                             <th>Status</th>
 
                         </tr>
@@ -497,15 +462,11 @@
                     </thead>
 
                     <tbody id="medicineTable">
-
                     </tbody>
 
                 </table>
 
             </div>
-
-
-            <!-- MESSAGE -->
 
             <div
                 class="message"
@@ -526,7 +487,6 @@
 
     </main>
 
-
     <script>
 
         /* =========================
@@ -541,7 +501,6 @@
             window.location.href = "index.html";
 
         }
-
 
         let currentUser = null;
 
@@ -561,7 +520,6 @@
 
         }
 
-
         /* =========================
            USER AVATAR
         ========================= */
@@ -580,7 +538,6 @@
 
         }
 
-
         /* =========================
            LOGOUT
         ========================= */
@@ -596,7 +553,6 @@
 
         }
 
-
         /* =========================
            MOBILE MENU
         ========================= */
@@ -610,9 +566,7 @@
 
         }
 
-
         let allMedicines = [];
-
 
         /* =========================
            LOAD MEDICINES
@@ -630,7 +584,6 @@
                     "message"
                 );
 
-
             table.innerHTML = "";
 
             message.style.display =
@@ -641,18 +594,15 @@
                 <div>Loading medicines...</div>
             `;
 
-
             try {
 
                 const response =
                     await fetch(
-                        "/api/medicines"
+                        "https://medicine-checker.onrender.com/api/medicines"
                     );
-
 
                 const data =
                     await response.json();
-
 
                 if (
                     !response.ok ||
@@ -666,15 +616,12 @@
 
                 }
 
-
                 allMedicines =
                     data.medicines || [];
-
 
                 displayMedicines(
                     allMedicines
                 );
-
 
             } catch (error) {
 
@@ -700,7 +647,6 @@
 
         }
 
-
         /* =========================
            DISPLAY MEDICINES
         ========================= */
@@ -719,9 +665,7 @@
                     "message"
                 );
 
-
             table.innerHTML = "";
-
 
             if (!medicines.length) {
 
@@ -737,10 +681,8 @@
 
             }
 
-
             message.style.display =
                 "none";
-
 
             medicines.forEach(
                 function(medicine, index) {
@@ -750,12 +692,10 @@
                             medicine
                         );
 
-
                     const row =
                         document.createElement(
                             "tr"
                         );
-
 
                     row.innerHTML = `
 
@@ -799,7 +739,6 @@
 
                     `;
 
-
                     table.appendChild(
                         row
                     );
@@ -808,7 +747,6 @@
             );
 
         }
-
 
         /* =========================
            STATUS
@@ -828,7 +766,6 @@
                     medicine.low_stock_limit || 10
                 );
 
-
             if (stock === 0) {
 
                 return {
@@ -837,7 +774,6 @@
                 };
 
             }
-
 
             if (stock <= limit) {
 
@@ -848,14 +784,12 @@
 
             }
 
-
             return {
                 text: "In Stock",
                 className: "in-stock"
             };
 
         }
-
 
         /* =========================
            SEARCH
@@ -874,7 +808,6 @@
                             .trim()
                             .toLowerCase();
 
-
                     if (!search) {
 
                         displayMedicines(
@@ -884,7 +817,6 @@
                         return;
 
                     }
-
 
                     const filtered =
                         allMedicines.filter(
@@ -927,14 +859,12 @@
                             }
                         );
 
-
                     displayMedicines(
                         filtered
                     );
 
                 }
             );
-
 
         /* =========================
            HTML SAFETY
@@ -967,7 +897,6 @@
                 );
 
         }
-
 
         /* =========================
            INITIAL LOAD
