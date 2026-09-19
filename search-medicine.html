@@ -425,7 +425,6 @@
 
     </div>
 
-
     <nav class="menu">
 
       <a href="dashboard.html">
@@ -480,12 +479,10 @@
 
   </aside>
 
-
   <div
     class="overlay"
     id="overlay"
   ></div>
-
 
   <!-- MAIN -->
 
@@ -504,7 +501,6 @@
         </p>
 
       </div>
-
 
       <div class="topbar-right">
 
@@ -527,7 +523,6 @@
 
     </div>
 
-
     <!-- SEARCH -->
 
     <div class="search-card">
@@ -535,7 +530,6 @@
       <div class="search-title">
         Search Inventory
       </div>
-
 
       <div class="search-row">
 
@@ -547,14 +541,12 @@
           autocomplete="off"
         >
 
-
         <button
           class="clear-btn"
           id="clearBtn"
         >
           Clear
         </button>
-
 
         <button
           class="refresh-btn"
@@ -566,7 +558,6 @@
       </div>
 
     </div>
-
 
     <!-- RESULTS -->
 
@@ -581,7 +572,6 @@
 
     </div>
 
-
     <div class="table-card">
 
       <div class="table-wrapper">
@@ -592,38 +582,23 @@
 
             <tr>
 
-              <th>
-                #
-              </th>
+              <th>#</th>
 
-              <th>
-                Medicine
-              </th>
+              <th>Medicine</th>
 
-              <th>
-                Company
-              </th>
+              <th>Company</th>
 
-              <th>
-                Category
-              </th>
+              <th>Category</th>
 
-              <th>
-                Price
-              </th>
+              <th>Price</th>
 
-              <th>
-                Stock
-              </th>
+              <th>Stock</th>
 
-              <th>
-                Status
-              </th>
+              <th>Status</th>
 
             </tr>
 
           </thead>
-
 
           <tbody id="medicineTable">
 
@@ -648,7 +623,6 @@
 
   </main>
 
-
   <script>
 
     /* =========================
@@ -656,7 +630,6 @@
     ========================= */
 
     let currentUser = null;
-
 
     try {
 
@@ -673,14 +646,12 @@
 
     }
 
-
     if (!currentUser) {
 
       window.location.href =
         "index.html";
 
     }
-
 
     /* =========================
        USER AVATAR
@@ -701,7 +672,6 @@
 
     }
 
-
     /* =========================
        LOGOUT
     ========================= */
@@ -717,31 +687,26 @@
 
     }
 
-
     /* =========================
        DATA
     ========================= */
 
     let medicines = [];
 
-
     const searchInput =
       document.getElementById(
         "searchInput"
       );
-
 
     const medicineTable =
       document.getElementById(
         "medicineTable"
       );
 
-
     const resultCount =
       document.getElementById(
         "resultCount"
       );
-
 
     /* =========================
        LOAD MEDICINES
@@ -760,18 +725,15 @@
         </tr>
       `;
 
-
       try {
 
         const response =
           await fetch(
-            "/api/medicines"
+            "https://medicine-checker.onrender.com/api/medicines"
           );
-
 
         const data =
           await response.json();
-
 
         if (
           !response.ok ||
@@ -785,13 +747,10 @@
 
         }
 
-
         medicines =
           data.medicines || [];
 
-
         renderMedicines();
-
 
       } catch (error) {
 
@@ -799,10 +758,8 @@
           error
         );
 
-
         resultCount.textContent =
           "Unable to load medicines.";
-
 
         medicineTable.innerHTML = `
           <tr>
@@ -819,7 +776,6 @@
 
     }
 
-
     /* =========================
        STATUS
     ========================= */
@@ -833,12 +789,10 @@
           medicine.stock
         );
 
-
       const limit =
         Number(
           medicine.low_stock_limit ?? 10
         );
-
 
       if (
         stock === 0
@@ -851,7 +805,6 @@
 
       }
 
-
       if (
         stock <= limit
       ) {
@@ -863,14 +816,12 @@
 
       }
 
-
       return {
         text: "In Stock",
         className: "in-stock"
       };
 
     }
-
 
     /* =========================
        ESCAPE HTML
@@ -906,7 +857,6 @@
 
     }
 
-
     /* =========================
        RENDER
     ========================= */
@@ -918,7 +868,6 @@
           .trim()
           .toLowerCase();
 
-
       const filtered =
         medicines.filter(
           medicine => {
@@ -928,18 +877,15 @@
                 medicine.medicine_name || ""
               ).toLowerCase();
 
-
             const company =
               String(
                 medicine.company || ""
               ).toLowerCase();
 
-
             const category =
               String(
                 medicine.category || ""
               ).toLowerCase();
-
 
             return (
               name.includes(
@@ -958,14 +904,12 @@
           }
         );
 
-
       resultCount.textContent =
         `${filtered.length} medicine${
           filtered.length === 1
             ? ""
             : "s"
         } found`;
-
 
       if (
         filtered.length === 0
@@ -986,7 +930,6 @@
 
       }
 
-
       medicineTable.innerHTML =
         filtered.map(
           (medicine, index) => {
@@ -995,7 +938,6 @@
               getStatus(
                 medicine
               );
-
 
             return `
               <tr>
@@ -1066,7 +1008,6 @@
 
     }
 
-
     /* =========================
        LIVE SEARCH
     ========================= */
@@ -1075,7 +1016,6 @@
       "input",
       renderMedicines
     );
-
 
     /* =========================
        CLEAR
@@ -1098,7 +1038,6 @@
         }
       );
 
-
     /* =========================
        REFRESH
     ========================= */
@@ -1112,7 +1051,6 @@
         loadMedicines
       );
 
-
     /* =========================
        MOBILE SIDEBAR
     ========================= */
@@ -1122,18 +1060,15 @@
         "sidebar"
       );
 
-
     const overlay =
       document.getElementById(
         "overlay"
       );
 
-
     const menuBtn =
       document.getElementById(
         "menuBtn"
       );
-
 
     menuBtn.addEventListener(
       "click",
@@ -1150,7 +1085,6 @@
       }
     );
 
-
     overlay.addEventListener(
       "click",
       () => {
@@ -1165,7 +1099,6 @@
 
       }
     );
-
 
     document
       .querySelectorAll(
@@ -1191,7 +1124,6 @@
 
         }
       );
-
 
     /* =========================
        START
