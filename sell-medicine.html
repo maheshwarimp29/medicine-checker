@@ -403,7 +403,6 @@
 
         </div>
 
-
         <nav class="menu">
 
             <a href="dashboard.html">
@@ -455,7 +454,6 @@
 
     </aside>
 
-
     <!-- MOBILE MENU -->
 
     <button
@@ -465,7 +463,6 @@
     >
         ☰
     </button>
-
 
     <!-- MAIN -->
 
@@ -489,19 +486,16 @@
 
         </section>
 
-
         <section class="card">
 
             <div class="card-title">
                 New Medicine Sale
             </div>
 
-
             <div
                 id="message"
                 class="message"
             ></div>
-
 
             <!-- MEDICINE -->
 
@@ -520,7 +514,6 @@
                 </select>
 
             </div>
-
 
             <!-- MEDICINE INFORMATION -->
 
@@ -550,7 +543,6 @@
 
                     </div>
 
-
                     <div class="info-item">
 
                         <span class="info-label">
@@ -565,7 +557,6 @@
                         </span>
 
                     </div>
-
 
                     <div class="info-item">
 
@@ -586,7 +577,6 @@
 
             </div>
 
-
             <!-- QUANTITY -->
 
             <div class="form-row">
@@ -606,7 +596,6 @@
                     >
 
                 </div>
-
 
                 <div class="form-group">
 
@@ -633,7 +622,6 @@
 
             </div>
 
-
             <button
                 class="sell-button"
                 id="sellButton"
@@ -646,13 +634,11 @@
 
     </main>
 
-
     <script>
 
         let medicines = [];
 
         let selectedMedicine = null;
-
 
         /* =========================
            GET LOGGED IN USER
@@ -675,13 +661,11 @@
 
         }
 
-
         if (!currentUser) {
 
             window.location.href = "index.html";
 
         }
-
 
         /* =========================
            USER AVATAR
@@ -702,7 +686,6 @@
 
         }
 
-
         /* =========================
            LOGOUT
         ========================= */
@@ -718,7 +701,6 @@
 
         }
 
-
         /* =========================
            MOBILE MENU
         ========================= */
@@ -731,7 +713,6 @@
                 .toggle("open");
 
         }
-
 
         /* =========================
            MESSAGE
@@ -751,7 +732,6 @@
 
         }
 
-
         function hideMessage() {
 
             const message =
@@ -760,7 +740,6 @@
             message.style.display = "none";
 
         }
-
 
         /* =========================
            LOAD MEDICINES
@@ -774,12 +753,12 @@
             try {
 
                 const response =
-                    await fetch("/api/medicines");
-
+                    await fetch(
+                        "https://medicine-checker.onrender.com/api/medicines"
+                    );
 
                 const data =
                     await response.json();
-
 
                 if (!response.ok || !data.success) {
 
@@ -790,23 +769,19 @@
 
                 }
 
-
                 medicines =
                     data.medicines || [];
-
 
                 select.innerHTML =
                     `<option value="">
                         Select a medicine
                     </option>`;
 
-
                 const availableMedicines =
                     medicines.filter(
                         medicine =>
                             Number(medicine.stock) > 0
                     );
-
 
                 availableMedicines.forEach(
                     medicine => {
@@ -827,7 +802,6 @@
                     }
                 );
 
-
                 if (
                     availableMedicines.length === 0
                 ) {
@@ -838,7 +812,6 @@
                         </option>`;
 
                 }
-
 
                 /* =========================
                    OPEN MEDICINE FROM URL
@@ -855,7 +828,6 @@
                     Number(
                         params.get("medicine")
                     );
-
 
                 if (
                     medicineId &&
@@ -893,7 +865,6 @@
 
         }
 
-
         /* =========================
            MEDICINE SELECT
         ========================= */
@@ -907,19 +878,16 @@
                     const id =
                         Number(this.value);
 
-
                     selectedMedicine =
                         medicines.find(
                             medicine =>
                                 Number(medicine.id) === id
                         );
 
-
                     const info =
                         document.getElementById(
                             "medicineInfo"
                         );
-
 
                     if (!selectedMedicine) {
 
@@ -934,15 +902,12 @@
 
                     }
 
-
                     info.classList.add("show");
-
 
                     document.getElementById(
                         "company"
                     ).textContent =
                         selectedMedicine.company || "—";
-
 
                     document.getElementById(
                         "price"
@@ -952,17 +917,14 @@
                             selectedMedicine.price
                         ).toFixed(2);
 
-
                     document.getElementById(
                         "stock"
                     ).textContent =
                         selectedMedicine.stock;
 
-
                     document.getElementById(
                         "quantity"
                     ).value = 1;
-
 
                     calculateTotal();
 
@@ -970,7 +932,6 @@
 
                 }
             );
-
 
         /* =========================
            CALCULATE TOTAL
@@ -982,7 +943,6 @@
                 "input",
                 calculateTotal
             );
-
 
         function calculateTotal() {
 
@@ -997,14 +957,12 @@
 
             }
 
-
             let quantity =
                 Number(
                     document.getElementById(
                         "quantity"
                     ).value
                 );
-
 
             if (
                 !Number.isFinite(quantity) ||
@@ -1015,13 +973,11 @@
 
             }
 
-
             const total =
                 quantity *
                 Number(
                     selectedMedicine.price
                 );
-
 
             document.getElementById(
                 "total"
@@ -1031,7 +987,6 @@
 
         }
 
-
         /* =========================
            SELL MEDICINE
         ========================= */
@@ -1039,7 +994,6 @@
         async function sellMedicine() {
 
             hideMessage();
-
 
             if (!selectedMedicine) {
 
@@ -1052,14 +1006,12 @@
 
             }
 
-
             const quantity =
                 Number(
                     document.getElementById(
                         "quantity"
                     ).value
                 );
-
 
             if (
                 !Number.isInteger(quantity) ||
@@ -1074,7 +1026,6 @@
                 return;
 
             }
-
 
             if (
                 quantity >
@@ -1092,24 +1043,21 @@
 
             }
 
-
             const button =
                 document.getElementById(
                     "sellButton"
                 );
-
 
             button.disabled = true;
 
             button.textContent =
                 "Processing Sale...";
 
-
             try {
 
                 const response =
                     await fetch(
-                        "/api/sales",
+                        "https://medicine-checker.onrender.com/api/sales",
                         {
                             method: "POST",
 
@@ -1130,10 +1078,8 @@
                         }
                     );
 
-
                 const data =
                     await response.json();
-
 
                 if (
                     !response.ok ||
@@ -1147,39 +1093,31 @@
 
                 }
 
-
                 showMessage(
                     `Sale completed successfully! ${quantity} × ${selectedMedicine.medicine_name} sold for ₹${Number(data.sale.total_price).toFixed(2)}.`,
                     "success"
                 );
 
-
                 document.getElementById(
                     "medicine"
                 ).value = "";
 
-
                 document.getElementById(
                     "quantity"
                 ).value = 1;
-
 
                 document.getElementById(
                     "total"
                 ).textContent =
                     "₹0.00";
 
-
                 document.getElementById(
                     "medicineInfo"
                 ).classList.remove("show");
 
-
                 selectedMedicine = null;
 
-
                 await loadMedicines();
-
 
             } catch (error) {
 
@@ -1201,7 +1139,6 @@
             }
 
         }
-
 
         /* =========================
            INITIAL LOAD
