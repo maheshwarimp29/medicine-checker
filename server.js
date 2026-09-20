@@ -1,49 +1,34 @@
 const express = require("express");
+const { Pool } = require("pg");
 const path = require("path");
-const Database = require("better-sqlite3");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // -----------------------------
-// Database
+// Database - Supabase PostgreSQL
 // -----------------------------
 
-const db = new Database("medicine-checker.db");
+if (!process.env.DATABASE_URL) {
+    console.error("DATABASE_URL is not set.");
+    process.exit(1);
+}
 
-db.pragma("journal_mode = WAL");
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
-db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS medicines (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        medicine_name TEXT NOT NULL,
-        company TEXT,
-        price REAL NOT NULL,
-        stock INTEGER NOT NULL DEFAULT 0,
-        low_stock_limit INTEGER NOT NULL DEFAULT 10,
-        category TEXT,
-        notes TEXT,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS sales (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        medicine_id INTEGER NOT NULL,
-        quantity INTEGER NOT NULL,
-        unit_price REAL NOT NULL,
-        total_price REAL NOT NULL,
-        sold_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (medicine_id) REFERENCES medicines(id)
-    );
-`);
+// Test database connection
+pool.query("SELECT NOW()")
+    .then(() => {
+        console.log("Supabase PostgreSQL connected successfully.");
+    })
+    .catch((error) => {
+        console.error("Database connection failed:", error.message);
+    });
 
 // -----------------------------
 // Middleware
@@ -51,7 +36,6 @@ db.exec(`
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(express.static(__dirname));
 
 // -----------------------------
@@ -69,9 +53,8 @@ app.get("/api/test", (req, res) => {
 // Register User
 // -----------------------------
 
-app.post("/api/register", (req, res) => {
+app.post("/api/register", async (req, res) => {
     try {
-
         const {
             name,
             email,
@@ -82,7 +65,6 @@ app.post("/api/register", (req, res) => {
         const userEmail = String(email || "").trim().toLowerCase();
         const userPassword = String(password || "");
 
-        // Validate
         if (!userName || !userEmail || !userPassword) {
             return res.status(400).json({
                 success: false,
@@ -104,7 +86,6 @@ app.post("/api/register", (req, res) => {
             });
         }
 
-        // Basic email validation
         const emailPattern =
             /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -115,53 +96,47 @@ app.post("/api/register", (req, res) => {
             });
         }
 
-        // Check existing user
-        const existingUser = db.prepare(`
+        const existingUser = await pool.query(
+            `
             SELECT id
             FROM users
-            WHERE email = ?
-        `).get(userEmail);
+            WHERE email = $1
+            `,
+            [userEmail]
+        );
 
-        if (existingUser) {
+        if (existingUser.rows.length > 0) {
             return res.status(409).json({
                 success: false,
                 message: "An account with this email already exists."
             });
         }
 
-        // Create user
-        const result = db.prepare(`
+        const result = await pool.query(
+            `
             INSERT INTO users
             (
                 name,
                 email,
                 password
             )
-            VALUES (?, ?, ?)
-        `).run(
-            userName,
-            userEmail,
-            userPassword
+            VALUES ($1, $2, $3)
+            RETURNING id, name, email, created_at
+            `,
+            [
+                userName,
+                userEmail,
+                userPassword
+            ]
         );
-
-        const user = db.prepare(`
-            SELECT
-                id,
-                name,
-                email,
-                created_at
-            FROM users
-            WHERE id = ?
-        `).get(result.lastInsertRowid);
 
         res.status(201).json({
             success: true,
             message: "Registration successful.",
-            user
+            user: result.rows[0]
         });
 
     } catch (error) {
-
         console.error(error);
 
         res.status(500).json({
@@ -175,9 +150,8 @@ app.post("/api/register", (req, res) => {
 // Login User
 // -----------------------------
 
-app.post("/api/login", (req, res) => {
+app.post("/api/login", async (req, res) => {
     try {
-
         const {
             email,
             password
@@ -196,22 +170,27 @@ app.post("/api/login", (req, res) => {
             });
         }
 
-        const user = db.prepare(`
+        const result = await pool.query(
+            `
             SELECT
                 id,
                 name,
                 email,
                 password
             FROM users
-            WHERE email = ?
-        `).get(userEmail);
+            WHERE email = $1
+            `,
+            [userEmail]
+        );
 
-        if (!user) {
+        if (result.rows.length === 0) {
             return res.status(401).json({
                 success: false,
                 message: "Invalid email or password."
             });
         }
+
+        const user = result.rows[0];
 
         if (user.password !== userPassword) {
             return res.status(401).json({
@@ -231,7 +210,6 @@ app.post("/api/login", (req, res) => {
         });
 
     } catch (error) {
-
         console.error(error);
 
         res.status(500).json({
@@ -245,9 +223,8 @@ app.post("/api/login", (req, res) => {
 // Add Medicine
 // -----------------------------
 
-app.post("/api/medicines", (req, res) => {
+app.post("/api/medicines", async (req, res) => {
     try {
-
         const {
             medicine_name,
             company,
@@ -271,7 +248,8 @@ app.post("/api/medicines", (req, res) => {
 
         const medicinePrice = Number(price);
         const medicineStock = Number(stock);
-        const lowStockLimit = Number(low_stock_limit ?? 10);
+        const lowStockLimit =
+            Number(low_stock_limit ?? 10);
 
         if (
             !Number.isFinite(medicinePrice) ||
@@ -287,7 +265,8 @@ app.post("/api/medicines", (req, res) => {
             });
         }
 
-        const result = db.prepare(`
+        const result = await pool.query(
+            `
             INSERT INTO medicines
             (
                 medicine_name,
@@ -298,31 +277,27 @@ app.post("/api/medicines", (req, res) => {
                 category,
                 notes
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).run(
-            medicine_name.trim(),
-            company?.trim() || "",
-            medicinePrice,
-            medicineStock,
-            lowStockLimit,
-            category || "",
-            notes?.trim() || ""
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+            `,
+            [
+                medicine_name.trim(),
+                company?.trim() || "",
+                medicinePrice,
+                medicineStock,
+                lowStockLimit,
+                category || "",
+                notes?.trim() || ""
+            ]
         );
-
-        const medicine = db.prepare(`
-            SELECT *
-            FROM medicines
-            WHERE id = ?
-        `).get(result.lastInsertRowid);
 
         res.status(201).json({
             success: true,
             message: "Medicine saved successfully.",
-            medicine
+            medicine: result.rows[0]
         });
 
     } catch (error) {
-
         console.error(error);
 
         res.status(500).json({
@@ -336,22 +311,22 @@ app.post("/api/medicines", (req, res) => {
 // Get All Medicines
 // -----------------------------
 
-app.get("/api/medicines", (req, res) => {
+app.get("/api/medicines", async (req, res) => {
     try {
-
-        const medicines = db.prepare(`
+        const result = await pool.query(
+            `
             SELECT *
             FROM medicines
             ORDER BY id DESC
-        `).all();
+            `
+        );
 
         res.json({
             success: true,
-            medicines
+            medicines: result.rows
         });
 
     } catch (error) {
-
         console.error(error);
 
         res.status(500).json({
@@ -365,9 +340,10 @@ app.get("/api/medicines", (req, res) => {
 // Sell Medicine
 // -----------------------------
 
-app.post("/api/sales", (req, res) => {
-    try {
+app.post("/api/sales", async (req, res) => {
+    const client = await pool.connect();
 
+    try {
         const {
             medicine_id,
             quantity
@@ -383,24 +359,37 @@ app.post("/api/sales", (req, res) => {
         ) {
             return res.status(400).json({
                 success: false,
-                message: "Please select a medicine and enter a valid quantity."
+                message:
+                    "Please select a medicine and enter a valid quantity."
             });
         }
 
-        const medicine = db.prepare(`
+        await client.query("BEGIN");
+
+        const medicineResult = await client.query(
+            `
             SELECT *
             FROM medicines
-            WHERE id = ?
-        `).get(medicineId);
+            WHERE id = $1
+            FOR UPDATE
+            `,
+            [medicineId]
+        );
 
-        if (!medicine) {
+        if (medicineResult.rows.length === 0) {
+            await client.query("ROLLBACK");
+
             return res.status(404).json({
                 success: false,
                 message: "Medicine not found."
             });
         }
 
+        const medicine = medicineResult.rows[0];
+
         if (medicine.stock < saleQuantity) {
+            await client.query("ROLLBACK");
+
             return res.status(400).json({
                 success: false,
                 message:
@@ -409,43 +398,44 @@ app.post("/api/sales", (req, res) => {
         }
 
         const unitPrice = Number(medicine.price);
+        const totalPrice = unitPrice * saleQuantity;
 
-        const totalPrice =
-            unitPrice * saleQuantity;
-
-        const completeSale = db.transaction(() => {
-
-            db.prepare(`
-                UPDATE medicines
-                SET stock = stock - ?
-                WHERE id = ?
-            `).run(
+        await client.query(
+            `
+            UPDATE medicines
+            SET stock = stock - $1
+            WHERE id = $2
+            `,
+            [
                 saleQuantity,
                 medicineId
-            );
+            ]
+        );
 
-            const result = db.prepare(`
-                INSERT INTO sales
-                (
-                    medicine_id,
-                    quantity,
-                    unit_price,
-                    total_price
-                )
-                VALUES (?, ?, ?, ?)
-            `).run(
+        const saleResult = await client.query(
+            `
+            INSERT INTO sales
+            (
+                medicine_id,
+                quantity,
+                unit_price,
+                total_price
+            )
+            VALUES ($1, $2, $3, $4)
+            RETURNING id
+            `,
+            [
                 medicineId,
                 saleQuantity,
                 unitPrice,
                 totalPrice
-            );
+            ]
+        );
 
-            return result.lastInsertRowid;
-        });
+        const saleId = saleResult.rows[0].id;
 
-        const saleId = completeSale();
-
-        const sale = db.prepare(`
+        const finalSale = await client.query(
+            `
             SELECT
                 sales.id,
                 sales.medicine_id,
@@ -458,16 +448,25 @@ app.post("/api/sales", (req, res) => {
             FROM sales
             INNER JOIN medicines
                 ON medicines.id = sales.medicine_id
-            WHERE sales.id = ?
-        `).get(saleId);
+            WHERE sales.id = $1
+            `,
+            [saleId]
+        );
+
+        await client.query("COMMIT");
 
         res.status(201).json({
             success: true,
             message: "Sale completed successfully.",
-            sale
+            sale: finalSale.rows[0]
         });
 
     } catch (error) {
+        try {
+            await client.query("ROLLBACK");
+        } catch (rollbackError) {
+            console.error(rollbackError);
+        }
 
         console.error(error);
 
@@ -475,6 +474,9 @@ app.post("/api/sales", (req, res) => {
             success: false,
             message: "Unable to complete the sale."
         });
+
+    } finally {
+        client.release();
     }
 });
 
@@ -482,10 +484,10 @@ app.post("/api/sales", (req, res) => {
 // Sales History
 // -----------------------------
 
-app.get("/api/sales", (req, res) => {
+app.get("/api/sales", async (req, res) => {
     try {
-
-        const sales = db.prepare(`
+        const result = await pool.query(
+            `
             SELECT
                 sales.id,
                 sales.medicine_id,
@@ -499,15 +501,15 @@ app.get("/api/sales", (req, res) => {
             INNER JOIN medicines
                 ON medicines.id = sales.medicine_id
             ORDER BY sales.id DESC
-        `).all();
+            `
+        );
 
         res.json({
             success: true,
-            sales
+            sales: result.rows
         });
 
     } catch (error) {
-
         console.error(error);
 
         res.status(500).json({
@@ -521,62 +523,83 @@ app.get("/api/sales", (req, res) => {
 // Dashboard Statistics
 // -----------------------------
 
-app.get("/api/dashboard", (req, res) => {
+app.get("/api/dashboard", async (req, res) => {
     try {
-
-        const totalMedicines = db.prepare(`
-            SELECT COUNT(*) AS count
+        const totalMedicinesResult = await pool.query(
+            `
+            SELECT COUNT(*)::INTEGER AS count
             FROM medicines
-        `).get().count;
+            `
+        );
 
-        const inStock = db.prepare(`
-            SELECT COUNT(*) AS count
+        const inStockResult = await pool.query(
+            `
+            SELECT COUNT(*)::INTEGER AS count
             FROM medicines
             WHERE stock > low_stock_limit
-        `).get().count;
+            `
+        );
 
-        const lowStock = db.prepare(`
-            SELECT COUNT(*) AS count
+        const lowStockResult = await pool.query(
+            `
+            SELECT COUNT(*)::INTEGER AS count
             FROM medicines
             WHERE stock > 0
             AND stock <= low_stock_limit
-        `).get().count;
+            `
+        );
 
-        const outOfStock = db.prepare(`
-            SELECT COUNT(*) AS count
+        const outOfStockResult = await pool.query(
+            `
+            SELECT COUNT(*)::INTEGER AS count
             FROM medicines
             WHERE stock = 0
-        `).get().count;
+            `
+        );
 
-        const todaySales = db.prepare(`
-            SELECT COALESCE(SUM(quantity), 0) AS count
+        const todaySalesResult = await pool.query(
+            `
+            SELECT COALESCE(SUM(quantity), 0)::INTEGER AS count
             FROM sales
-            WHERE date(sold_at, 'localtime') =
-                  date('now', 'localtime')
-        `).get().count;
+            WHERE (sold_at AT TIME ZONE 'Asia/Kolkata')::DATE =
+                  (NOW() AT TIME ZONE 'Asia/Kolkata')::DATE
+            `
+        );
 
-        const todayRevenue = db.prepare(`
-            SELECT COALESCE(SUM(total_price), 0) AS revenue
+        const todayRevenueResult = await pool.query(
+            `
+            SELECT COALESCE(SUM(total_price), 0)::NUMERIC AS revenue
             FROM sales
-            WHERE date(sold_at, 'localtime') =
-                  date('now', 'localtime')
-        `).get().revenue;
+            WHERE (sold_at AT TIME ZONE 'Asia/Kolkata')::DATE =
+                  (NOW() AT TIME ZONE 'Asia/Kolkata')::DATE
+            `
+        );
 
         res.json({
             success: true,
 
             stats: {
-                totalMedicines,
-                inStock,
-                lowStock,
-                outOfStock,
-                todaySales,
-                todayRevenue
+                totalMedicines:
+                    totalMedicinesResult.rows[0].count,
+
+                inStock:
+                    inStockResult.rows[0].count,
+
+                lowStock:
+                    lowStockResult.rows[0].count,
+
+                outOfStock:
+                    outOfStockResult.rows[0].count,
+
+                todaySales:
+                    todaySalesResult.rows[0].count,
+
+                todayRevenue:
+                    Number(todayRevenueResult.rows[0].revenue)
             }
         });
 
     } catch (error) {
-
         console.error(error);
 
         res.status(500).json({
@@ -591,17 +614,12 @@ app.get("/api/dashboard", (req, res) => {
 // -----------------------------
 
 app.listen(PORT, () => {
-
     console.log("");
-
     console.log("======================================");
     console.log(" Medicine Availability Checker");
     console.log("======================================");
-
     console.log(
-        `Server running at: http://localhost:${PORT}`
+        `Server running on port: ${PORT}`
     );
-
     console.log("");
-
 });
