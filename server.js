@@ -21,14 +21,53 @@ const pool = new Pool({
     }
 });
 
-// Test database connection
-pool.query("SELECT NOW()")
-    .then(() => {
+// -----------------------------
+// Create Database Tables
+// -----------------------------
+
+async function initializeDatabase() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                password TEXT NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS medicines (
+                id SERIAL PRIMARY KEY,
+                medicine_name TEXT NOT NULL,
+                company TEXT,
+                price NUMERIC NOT NULL,
+                stock INTEGER NOT NULL DEFAULT 0,
+                low_stock_limit INTEGER NOT NULL DEFAULT 10,
+                category TEXT,
+                notes TEXT,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS sales (
+                id SERIAL PRIMARY KEY,
+                medicine_id INTEGER NOT NULL,
+                quantity INTEGER NOT NULL,
+                unit_price NUMERIC NOT NULL,
+                total_price NUMERIC NOT NULL,
+                sold_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (medicine_id)
+                    REFERENCES medicines(id)
+            );
+        `);
+
         console.log("Supabase PostgreSQL connected successfully.");
-    })
-    .catch((error) => {
-        console.error("Database connection failed:", error.message);
-    });
+        console.log("Database tables are ready.");
+    } catch (error) {
+        console.error("Database initialization failed:", error.message);
+    }
+}
+
+initializeDatabase();
 
 // -----------------------------
 // Middleware
@@ -36,6 +75,7 @@ pool.query("SELECT NOW()")
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(express.static(__dirname));
 
 // -----------------------------
@@ -86,8 +126,7 @@ app.post("/api/register", async (req, res) => {
             });
         }
 
-        const emailPattern =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailPattern.test(userEmail)) {
             return res.status(400).json({
@@ -462,6 +501,7 @@ app.post("/api/sales", async (req, res) => {
         });
 
     } catch (error) {
+
         try {
             await client.query("ROLLBACK");
         } catch (rollbackError) {
@@ -525,6 +565,7 @@ app.get("/api/sales", async (req, res) => {
 
 app.get("/api/dashboard", async (req, res) => {
     try {
+
         const totalMedicinesResult = await pool.query(
             `
             SELECT COUNT(*)::INTEGER AS count
@@ -614,12 +655,16 @@ app.get("/api/dashboard", async (req, res) => {
 // -----------------------------
 
 app.listen(PORT, () => {
+
     console.log("");
+
     console.log("======================================");
     console.log(" Medicine Availability Checker");
     console.log("======================================");
+
     console.log(
         `Server running on port: ${PORT}`
     );
+
     console.log("");
 });
